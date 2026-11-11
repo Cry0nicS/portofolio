@@ -1,38 +1,11 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 
-const ACCENTS = [
-  "spree",
-  "tiergarten",
-  "ostsee",
-  "plum",
-  "indigo",
-  "mustard",
-] as const;
 const KONAMI =
   "ArrowUp ArrowUp ArrowDown ArrowDown ArrowLeft ArrowRight ArrowLeft ArrowRight b a".split(
     " ",
   );
-
-function save(key: string, value: string) {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    // storage blocked: the choice just lasts for this page view
-  }
-}
-
-function setAccent(accent: string) {
-  document.documentElement.dataset.accent = accent;
-  save("accent", accent);
-  window.dispatchEvent(new Event("accentchange"));
-}
-
-function subscribe(onChange: () => void) {
-  window.addEventListener("accentchange", onChange);
-  return () => window.removeEventListener("accentchange", onChange);
-}
 
 export function ThemeToggle() {
   function toggle() {
@@ -41,7 +14,11 @@ export function ThemeToggle() {
       ? root.dataset.theme === "dark"
       : window.matchMedia("(prefers-color-scheme: dark)").matches;
     root.dataset.theme = dark ? "light" : "dark";
-    save("theme", root.dataset.theme);
+    try {
+      localStorage.setItem("theme", root.dataset.theme);
+    } catch {
+      // storage blocked: the choice just lasts for this page view
+    }
   }
   return (
     <button
@@ -65,15 +42,10 @@ export function ThemeToggle() {
   );
 }
 
-export function AccentPicker() {
-  const current = useSyncExternalStore(
-    subscribe,
-    () => document.documentElement.dataset.accent ?? ACCENTS[0],
-    () => ACCENTS[0],
-  );
+// Easter egg: the Konami code shows a short note. Listens only, never blocks a key.
+export function Konami() {
   const [gg, setGg] = useState(false);
 
-  // Easter egg: the Konami code jumps to the next accent. Listens only, never blocks a key.
   useEffect(() => {
     let step = 0;
     let timer: ReturnType<typeof setTimeout>;
@@ -84,13 +56,6 @@ export function AccentPicker() {
       step = key === KONAMI[step] ? step + 1 : restart;
       if (step < KONAMI.length) return;
       step = 0;
-      const now = document.documentElement.dataset.accent ?? ACCENTS[0];
-      setAccent(
-        ACCENTS[
-          (ACCENTS.indexOf(now as (typeof ACCENTS)[number]) + 1) %
-            ACCENTS.length
-        ],
-      );
       setGg(true);
       clearTimeout(timer);
       timer = setTimeout(() => setGg(false), 2500);
@@ -103,43 +68,8 @@ export function AccentPicker() {
   }, []);
 
   return (
-    <>
-      <details
-        className="picker"
-        onBlur={(event) => {
-          // No relatedTarget means a mouse press (Safari), not focus moving on: stay open.
-          if (
-            event.relatedTarget &&
-            !event.currentTarget.contains(event.relatedTarget)
-          )
-            event.currentTarget.open = false;
-        }}
-        onKeyDown={(event) => {
-          if (event.key !== "Escape") return;
-          event.currentTarget.open = false;
-          event.currentTarget.querySelector("summary")?.focus();
-        }}
-      >
-        <summary className="icon-btn" aria-label="Accent colour" />
-        <ul>
-          {ACCENTS.map((accent) => (
-            <li key={accent}>
-              <button
-                type="button"
-                className="swatch"
-                data-accent={accent}
-                aria-pressed={current === accent}
-                onClick={() => setAccent(accent)}
-              >
-                {accent}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </details>
-      <p className="toast" role="status" hidden={!gg}>
-        🕹️ gg wp. cheat code accepted.
-      </p>
-    </>
+    <p className="toast" role="status" hidden={!gg}>
+      🕹️ gg wp. cheat code accepted.
+    </p>
   );
 }
