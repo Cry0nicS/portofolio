@@ -111,3 +111,7 @@ dist
 
 # TernJS port file
 .tern-port
+
+# next.js / vercel
+next-env.d.ts
+.vercel
