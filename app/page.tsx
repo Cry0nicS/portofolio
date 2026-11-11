@@ -1,376 +1,327 @@
+// The homepage as release notes, newest first.
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import {
+  now,
+  esportsStats,
+  esportsTimeline,
+  tools,
+  projects,
+  sideProjects,
+  experience,
+} from "./content";
+import { PenTrail } from "./pen-trail";
+import "./home.css";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
-const now = [
-  "Leading website, AI & automation at mkk meine-krankenkasse",
-  "Based in Berlin, working remote",
-  "Open to interesting conversations",
+const index = [
+  ["#v3", "v3.0", "ai-first", "2022 – now"],
+  ["#berlin", "v2.0", "berlin", "2020 – 2022"],
+  ["#esports", "v1.0", "esports", "2012 – 2022"],
+  ["#after-hours", "ext", "side quests", "after hours"],
+  ["#experience", "log", "version history", "2013 – now"],
 ];
 
-const esportsStats = [
-  ["The International 2017", "admin / referee"],
-  ["Kiev Major 2017 · Boston Major 2016", "admin / referee"],
-  [
-    "Millions of users monthly",
-    "a core GosuGamers module I designed and built",
-  ],
-  [
-    "Founded Esports Addicts",
-    "events across multiple Romanian cities (2015 – 2018)",
-  ],
-];
+const marks = { add: "+", change: "~", remove: "−", next: "›" };
 
-const esportsTimeline = [
-  [
-    "2012 – 2014",
-    "Dota 2 Romania",
-    "developer, live commentator, tournament admin",
-  ],
-  ["2013 – 2015", "PGL", "first Dota 2 events in Romania, DreamHack Bucharest"],
-  [
-    "2014",
-    "IeSF",
-    "hosted the Dota 2 regional qualifiers for the e-Sports World Championship",
-  ],
-  [
-    "2014 – 2016",
-    "Esports journalist",
-    "live coverage and interviews in Romanian and English",
-  ],
-  [
-    "",
-    "joinDOTA League",
-    "tournament admin, then trained a team of junior admins",
-  ],
-  ["2015 – 2018", "Founder, Esports Addicts", ""],
-  [
-    "2015 – 2022",
-    "Software Engineer, GosuGamers",
-    "back end to full stack; admin panel used daily around the globe",
-  ],
-  [
-    "2016 – 2018",
-    "The big stages",
-    "The International, Kiev and Boston Majors, PUBG and Fortnite championships",
-  ],
-];
-
-const tools = ["Claude Code", "MCP", "n8n", "AWS Bedrock", "OpenRouter"];
-
-const projects = [
-  [
-    "RAG in production",
-    "AI search and “Ask AI” for a health insurer",
-    "Built Algolia AI search and set up an Ask AI answer agent on the public website: configuration, prompts, guardrails, model selection and widget.",
-  ],
-  [
-    "LLM-as-a-judge",
-    "Testing an AI that answers health questions",
-    "A self-built evaluation and regression-testing tool for the answer agent (TypeScript, GitLab CI, Algolia API), so model and prompt changes are decided on evidence, not gut feeling.",
-  ],
-  [
-    "200+ submissions in month one",
-    "User feedback, triaged by AI",
-    "Built alone from idea to delivery: on-page feedback, n8n, AWS Bedrock classification and fix proposals, a human reviewer, routing to Slack and Jira.",
-  ],
-];
-
-const sideProjects = [
-  [
-    "Chaptify",
-    "Splits audiobooks into per-chapter files. Solo full stack: Nuxt, SQLite job queue, FFmpeg worker, Docker, CI.",
-    "Tool",
-    "https://chaptify.app",
-    "chaptify.app",
-  ],
-  [
-    "Cafe Prana",
-    "Bilingual website for a vegan cafe in Prenzlauer Berg; the owner, Sarah, edits content herself via Nuxt Studio, no developer needed.",
-    "Client site",
-    "https://www.cafeprana.de",
-    "cafeprana.de",
-  ],
-  [
-    "Cancer Type Classifier",
-    "Open-source Nuxt front end for a classifier based on DNA methylation profiles, built with two researchers who own the model.",
-    "Open source · discontinued",
-    "https://github.com/Cry0nicS/cancer-classifier-frontend",
-    "github.com",
-  ],
-];
-
-const experience = [
-  [
-    "2024 — Now",
-    "mkk meine-krankenkasse",
-    "Technical Product Owner, Website, AI & Automation",
-  ],
-  ["2022 — 2024", "mkk meine-krankenkasse", "Senior Software Developer"],
-  ["2015 — 2022", "GosuGamers", "Software Engineer"],
-  ["2015 — 2018", "Esports Addicts", "Founder & Project Manager"],
-  ["2013 — 2015", "CGM Clinical Österreich", "Software Engineer"],
-];
-
-function Scribble({ d, viewBox }: { d: string; viewBox: string }) {
-  return (
-    <svg
-      className="scribble"
-      viewBox={viewBox}
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <path d={d} />
-    </svg>
-  );
-}
-
-function Rule() {
-  return (
-    <svg
-      className="rule wrap"
-      viewBox="0 0 600 10"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <path d="M2 6C60 2 110 9 170 5s120-3 180 1 110 3 160-1 60 1 86 1" />
-    </svg>
-  );
-}
-
-function Chapter({
-  id,
-  version,
-  years,
+function Group({
+  title,
+  kind,
   children,
 }: {
-  id: string;
-  version: string;
-  years: string;
+  title: string;
+  kind: keyof typeof marks;
   children: ReactNode;
 }) {
   return (
-    <section className="wrap chapter" id={id}>
-      <p className="marker">
-        <span className="tag">{version}</span>
-        <span className="muted">{years}</span>
-      </p>
-      <div className="chapter-body">{children}</div>
+    <section className="cl-group" data-mark={marks[kind]}>
+      <h3>{title}</h3>
+      <ul>{children}</ul>
     </section>
+  );
+}
+
+function Item({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <li>
+      <strong>{title}</strong>
+      <span>{children}</span>
+    </li>
+  );
+}
+
+function ReleaseHead({
+  version,
+  name,
+  years,
+  latest,
+}: {
+  version: string;
+  name: string;
+  years: string;
+  latest?: boolean;
+}) {
+  return (
+    <header className="cl-head">
+      <p className="cl-ver">
+        <span className="cl-num">{version}</span>
+        <span className="cl-name">{name}</span>
+      </p>
+      <p className="cl-date">
+        {latest && <span className="cl-badge">latest</span>}
+        {years}
+      </p>
+    </header>
   );
 }
 
 export default function Home() {
   return (
-    <>
-      <section className="wrap hero">
-        <p className="tag">Patch notes, v3 · 2026 · Berlin</p>
-        <h1>
-          <span className="underlined">
-            Builder
-            <Scribble
-              viewBox="0 0 300 14"
-              d="M3 9C50 3 96 12 150 6s98-3 147 2"
-            />
-          </span>{" "}
-          first.
-        </h1>
-        <div className="hero-grid">
-          <p className="lead">
+    <div className="changelog wrap">
+      <PenTrail />
+      <aside className="cl-side" aria-label="Release index">
+        <p className="cl-side-title">
+          Changelog
+          <span className="cl-badge">v3.0 current</span>
+        </p>
+        <nav aria-label="Releases">
+          <ol className="cl-index">
+            {index.map(([href, version, name, years]) => (
+              <li key={href}>
+                <a href={href}>
+                  <span className="cl-index-ver">{version}</span>
+                  <span className="cl-index-name">{name}</span>
+                  <span className="cl-index-years">{years}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+        <p className="cl-side-label">Status</p>
+        <ul className="cl-now">
+          {now.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </aside>
+
+      <div className="cl-main">
+        <article className="cl-release" id="v3">
+          <ReleaseHead
+            version="v3.0"
+            name="ai-first"
+            years="2022 – now"
+            latest
+          />
+          <h1>Builder first.</h1>
+          <p className="cl-lead">
             Technical Product Owner at mkk meine-krankenkasse, leading the
             public website and applied AI adoption in the digital department.
             Previously nearly a decade in esports, as an engineer at GosuGamers
             and as an admin and referee at Dota 2 Majors and The International.
           </p>
-          <blockquote className="manifesto">
+          <blockquote className="cl-quote">
             <p>
               I believe the best use of AI is not replacing people but giving
               them systems they can run themselves. Build it, test it, ship it,
-              then{" "}
-              <span className="circled">
-                hand it over
-                <Scribble
-                  viewBox="0 0 120 40"
-                  d="M14 8C45 0 98 2 112 16s-22 22-58 22S2 30 6 18 30 4 62 5"
-                />
-              </span>{" "}
-              so it keeps working without me.
+              then hand it over so it keeps working without me.
             </p>
           </blockquote>
-        </div>
-        <div className="hero-foot">
-          <a className="btn btn-primary" href="#work">
-            See the work
-          </a>
-          <a className="btn" href="#esports">
-            The esports years
-          </a>
-          <p className="note">
-            <Scribble
-              viewBox="0 0 44 26"
-              d="M42 20C28 24 12 20 4 8M4 8l1 9M4 8l9 2"
-            />
-            gg wp. now back to shipping.
+          <p className="cl-cta">
+            <a className="cl-btn cl-btn-primary" href="#work">
+              See the work
+            </a>
+            <a className="cl-btn" href="#esports">
+              The esports years
+            </a>
           </p>
-        </div>
-      </section>
-
-      <ul className="wrap now" aria-label="Now">
-        {now.map((item) => (
-          <li key={item}>
-            <span className="dot" aria-hidden="true" />
-            {item}
-          </li>
-        ))}
-      </ul>
-
-      <Rule />
-
-      <Chapter id="esports" version="v1 · esports" years="2012 – 2022">
-        <h2>Ten years in the server room of esports.</h2>
-        <p>
-          I started as a volunteer in 2012, helping turn a weekend Dota 2
-          project into a Romanian media site with 10,000+ monthly users. I
-          administered leagues, commentated matches, covered events as a
-          journalist, and founded Esports Addicts to grow the local scene with
-          tournaments across Romanian cities.
-        </p>
-        <p>
-          Along the way I refereed and administered at some of the biggest
-          stages in the game, and spent seven years as an engineer at
-          GosuGamers, one of the world&apos;s largest esports media platforms.
-        </p>
-        <ul className="grid two">
-          {esportsStats.map(([stat, label]) => (
-            <li className="card" key={stat}>
-              <p className="stat">{stat}</p>
-              <p className="mono">{label}</p>
-            </li>
-          ))}
-        </ul>
-        <ol className="rows">
-          {esportsTimeline.map(([years, title, detail]) => (
-            <li key={title}>
-              <span className="mono">{years}</span>
-              <span>
-                <strong>{title}</strong>
-                {detail && <span className="muted"> · {detail}</span>}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </Chapter>
-
-      <Rule />
-
-      <section className="interlude" id="berlin">
-        <p className="loading tag">
-          <span className="bar" aria-hidden="true">
-            {Array.from({ length: 10 }, (_, i) => (
-              <i key={i} />
+          {/* Shown on small screens only, where the sidebar status is hidden */}
+          <ul className="cl-now cl-now-inline" aria-label="Status">
+            {now.map((item) => (
+              <li key={item}>{item}</li>
             ))}
-          </span>
-          loading v2 · berlin · 2020 – 2022
-        </p>
-        <h2>Then the arenas went quiet.</h2>
-        <p>
-          For years I worked fully remote as a digital nomad, building esports
-          products from wherever the next event or flight took me. When Corona
-          hit, live esports stopped overnight, and so did the nomad life.
-        </p>
-        <p>
-          In spring 2021, as the borders reopened, I moved to Berlin and settled
-          here. A year later I left gaming for something completely different:
-          the public website of a German statutory health insurer.
-        </p>
-        <p>
-          Same habits, different stakes: millions of insured people, regulation,
-          accessibility, and a legacy platform nobody owned.
-        </p>
-        <p className="newgame">&gt; game over. new game +</p>
-      </section>
+          </ul>
 
-      <Rule />
+          <section className="cl-notes" id="work">
+            <h2>Making a whole department faster with AI.</h2>
+            <p>
+              Small team, regulated industry, real users. Each entry is proof
+              that one product owner who still writes code can change what a
+              team ships.
+            </p>
 
-      <Chapter id="work" version="v3 · ai-first" years="2022 – now">
-        <h2>Making a whole department faster with AI.</h2>
-        <p>
-          At mkk meine-krankenkasse I initiated and lead applied AI adoption in
-          the digital department. I&apos;m setting up our organisation-level
-          Claude environment, with custom skills, repositories and workflows
-          that about 15 colleagues now use for their daily work, and bringing
-          new tools into real use. Workshops and hackathons are next.
-        </p>
-        <ul className="chips" aria-label="Tools in use">
-          {tools.map((tool) => (
-            <li key={tool}>{tool}</li>
-          ))}
-        </ul>
-        <p>
-          I care less about demos and more about systems other people can
-          operate without me. That&apos;s how one person&apos;s curiosity turns
-          into a team&apos;s capability.
-        </p>
+            <Group title="Added" kind="add">
+              <Item title="Applied AI adoption">
+                Initiated and lead it for the digital department at mkk
+                meine-krankenkasse, bringing new tools into real use.
+              </Item>
+              <Item title="Organisation-level Claude environment">
+                Custom skills, repositories and workflows that about 15
+                colleagues now use for their daily work.
+              </Item>
+              <Item title="Toolchain">
+                <span className="cl-tools">{tools.join(" · ")}</span>
+              </Item>
+            </Group>
 
-        <h2 className="sub">Hands-on projects, idea to production.</h2>
-        <p>
-          Small team, regulated industry, real users. Each project is proof that
-          one product owner who still writes code can change what a team ships.
-        </p>
-        <ul className="grid">
-          {projects.map(([stat, title, text]) => (
-            <li className="card" key={title}>
-              <p className="stat">{stat}</p>
-              <h3>{title}</h3>
-              <p>{text}</p>
-            </li>
-          ))}
-        </ul>
-      </Chapter>
+            <Group title="Shipped" kind="add">
+              {projects.map(([stat, title, text]) => (
+                <li key={title}>
+                  <strong>{title}</strong>
+                  <span className="cl-stat">{stat}</span>
+                  <span>{text}</span>
+                </li>
+              ))}
+            </Group>
 
-      <Rule />
+            <Group title="Changed" kind="change">
+              <Item title="Role">
+                Senior Software Developer (2022) to Technical Product Owner,
+                Website, AI &amp; Automation (2024).
+              </Item>
+              <Item title="Focus">
+                Less about demos, more about systems other people can operate
+                without me. That is how one person&apos;s curiosity turns into a
+                team&apos;s capability.
+              </Item>
+            </Group>
 
-      <section className="wrap chapter-body" id="after-hours">
-        <p className="tag">side quests</p>
-        <h2>Things I build after hours.</h2>
-        <ul className="grid">
-          {sideProjects.map(([title, text, tag, href, host]) => (
-            <li key={title} style={{ display: "contents" }}>
-              <a className="card" href={href}>
-                <h3>{title}</h3>
-                <p>{text}</p>
-                <span className="card-foot mono">
-                  <span>{tag}</span>
-                  <span>{host} ↗</span>
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
+            <Group title="Unreleased" kind="next">
+              <Item title="Workshops and hackathons">Next up.</Item>
+            </Group>
+          </section>
+        </article>
 
-      <Rule />
+        <article className="cl-release" id="berlin">
+          <ReleaseHead version="v2.0" name="berlin" years="2020 – 2022" />
+          <h2>Then the arenas went quiet.</h2>
+          <p>
+            Same habits, different stakes: millions of insured people,
+            regulation, accessibility, and a legacy platform nobody owned.
+          </p>
 
-      <section className="wrap chapter-body" id="experience">
-        <p className="tag">changelog</p>
-        <h2>Experience</h2>
-        <ol className="rows exp">
-          {experience.map(([years, company, role]) => (
-            <li key={years + role}>
-              <span className="mono">{years}</span>
-              <strong>{company}</strong>
-              <span className="muted">{role}</span>
-            </li>
-          ))}
-        </ol>
-        <p className="mono muted">
-          BSc Computer Science, Technical University of Cluj-Napoca · thesis on
-          multi-agent systems for traffic routing. Certification: CSPO.
-        </p>
-      </section>
+          <Group title="Removed" kind="remove">
+            <Item title="Live esports">
+              When Corona hit, it stopped overnight.
+            </Item>
+            <Item title="The nomad life">
+              Years of working fully remote, building esports products from
+              wherever the next event or flight took me, ended with it.
+            </Item>
+            <Item title="Gaming">
+              Left the industry in 2022 for something completely different.
+            </Item>
+          </Group>
 
-      <Rule />
-    </>
+          <Group title="Changed" kind="change">
+            <Item title="Home base">
+              Moved to Berlin in spring 2021, as the borders reopened, and
+              settled here.
+            </Item>
+            <Item title="Industry">
+              From esports to the public website of a German statutory health
+              insurer.
+            </Item>
+          </Group>
+        </article>
+
+        <article className="cl-release" id="esports">
+          <ReleaseHead version="v1.0" name="esports" years="2012 – 2022" />
+          <h2>Ten years in the server room of esports.</h2>
+          <p>
+            I started as a volunteer in 2012, helping turn a weekend Dota 2
+            project into a Romanian media site with 10,000+ monthly users. I
+            administered leagues, commentated matches, covered events as a
+            journalist, and founded Esports Addicts to grow the local scene.
+          </p>
+          <p>
+            Along the way I refereed and administered at some of the biggest
+            stages in the game, and spent seven years as an engineer at
+            GosuGamers, one of the world&apos;s largest esports media platforms.
+          </p>
+
+          <section className="cl-group">
+            <h3>Highlights</h3>
+            <dl className="cl-stats">
+              {esportsStats.map(([stat, label]) => (
+                <div key={stat}>
+                  <dt>{stat}</dt>
+                  <dd>{label}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          <section className="cl-group">
+            <h3>Log</h3>
+            <ol className="cl-log">
+              {esportsTimeline.map(([years, title, detail]) => (
+                <li key={title}>
+                  <span className="cl-log-years">{years}</span>
+                  <span>
+                    <strong>{title}</strong>
+                    {detail && <span className="muted"> · {detail}</span>}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        </article>
+
+        <article className="cl-release" id="after-hours">
+          <ReleaseHead version="ext" name="side quests" years="after hours" />
+          <h2>Things I build after hours.</h2>
+          <ul className="cl-plugins">
+            {sideProjects.map(([title, text, tag, href, host]) => (
+              <li key={title}>
+                <a
+                  href={href}
+                  data-mark={tag.includes("discontinued") ? "−" : "+"}
+                >
+                  <span className="cl-plugin-head">
+                    <strong>{title}</strong>
+                    <span className="cl-plugin-tag">{tag}</span>
+                    <span className="cl-plugin-host">{host} ↗</span>
+                  </span>
+                  <span className="cl-plugin-text">{text}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </article>
+
+        <article className="cl-release" id="experience">
+          <ReleaseHead
+            version="log"
+            name="version history"
+            years="2013 – now"
+          />
+          <h2>Experience</h2>
+          <table className="cl-table">
+            <thead>
+              <tr>
+                <th scope="col">Period</th>
+                <th scope="col">Company</th>
+                <th scope="col">Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              {experience.map(([years, company, role]) => (
+                <tr key={years + role}>
+                  <td>{years}</td>
+                  <th scope="row">{company}</th>
+                  <td>{role}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="cl-edu">
+            BSc Computer Science, Technical University of Cluj-Napoca · thesis
+            on multi-agent systems for traffic routing. Certification: CSPO.
+          </p>
+        </article>
+      </div>
+    </div>
   );
 }

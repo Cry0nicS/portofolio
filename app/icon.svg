@@ -3,12 +3,12 @@
     .ink { stroke: #221d16; }
     .dot { fill: #221d16; }
     .body { fill: #f4eee1; }
-    .screen { fill: #17607a; }
+    .screen { fill: #2c6a3a; }
     @media (prefers-color-scheme: dark) {
       .ink { stroke: #ece4d6; }
       .dot { fill: #ece4d6; }
       .body { fill: #191613; }
-      .screen { fill: #7cc4dc; }
+      .screen { fill: #8fce9a; }
     }
   </style>
   <path class="ink body" d="M9 2.5h14a2 2 0 0 1 2 2V23a6.5 6.5 0 0 1-6.5 6.5H9a2 2 0 0 1-2-2v-23a2 2 0 0 1 2-2z" stroke-width="2" stroke-linejoin="round"/>

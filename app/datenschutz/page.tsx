@@ -38,10 +38,10 @@ export default function Datenschutz() {
       <h2>Cookies, Tracking und lokale Einstellungen</h2>
       <p>
         Es werden keine Cookies gesetzt und keine Analyse- oder Tracking-Dienste
-        eingesetzt. Wenn Sie das Farbschema oder die Akzentfarbe ändern, wird
-        diese Auswahl ausschließlich lokal in Ihrem Browser gespeichert
-        (localStorage) und nicht an mich oder Dritte übertragen. Sie können sie
-        jederzeit über die Browser-Einstellungen löschen.
+        eingesetzt. Wenn Sie das Farbschema ändern, wird diese Auswahl
+        ausschließlich lokal in Ihrem Browser gespeichert (localStorage) und
+        nicht an mich oder Dritte übertragen. Sie können sie jederzeit über die
+        Browser-Einstellungen löschen.
       </p>
 
       <h2>Schriftarten</h2>

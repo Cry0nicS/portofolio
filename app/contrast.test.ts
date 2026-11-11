@@ -30,7 +30,7 @@ test("text and accent colours meet 4.5:1 on bg and card in both themes", () => {
   const surfaces = [...pairs("bg"), ...pairs("card")];
   const inks = [...pairs("text"), ...pairs("muted"), ...pairs("accent")];
   expect(surfaces).toHaveLength(2);
-  expect(inks.length).toBe(9); // text, muted, default accent + 6 named palettes
+  expect(inks.length).toBe(3); // text, muted, accent
   for (const ink of inks)
     for (const surface of surfaces)
       for (const theme of [0, 1] as const)

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
-import { AccentPicker, ThemeToggle } from "./controls";
+import { Konami, ThemeToggle } from "./controls";
 import "./globals.css";
 
 // next/font downloads Geist at build time and serves it from this domain: no Google requests at runtime.
@@ -31,8 +31,8 @@ export const metadata: Metadata = {
   },
 };
 
-// Runs before first paint so a saved theme or accent never flashes.
-const restorePrefs = `try{var d=document.documentElement,t=localStorage.getItem("theme"),a=localStorage.getItem("accent");if(t==="light"||t==="dark")d.dataset.theme=t;if(a&&/^[a-z]+$/.test(a))d.dataset.accent=a}catch(e){}`;
+// Runs before first paint so a saved theme never flashes.
+const restorePrefs = `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
 
 const links = [
   ["/#esports", "esports"],
@@ -136,7 +136,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </div>
         </footer>
 
-        <AccentPicker />
+        <Konami />
       </body>
     </html>
   );
