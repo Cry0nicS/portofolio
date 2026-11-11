@@ -19,15 +19,16 @@ export function PenTrail() {
 
     function resize() {
       const ratio = window.devicePixelRatio || 1;
-      canvas!.width = window.innerWidth * ratio;
-      canvas!.height = window.innerHeight * ratio;
+      // Size from the element, not the window: its box excludes a classic scrollbar.
+      canvas!.width = canvas!.clientWidth * ratio;
+      canvas!.height = canvas!.clientHeight * ratio;
       ctx!.setTransform(ratio, 0, 0, ratio, 0, 0);
     }
 
     function draw() {
       const now = performance.now();
       points = points.filter((point) => now - point.t < LIFE);
-      ctx!.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      ctx!.clearRect(0, 0, canvas!.clientWidth, canvas!.clientHeight);
       ctx!.strokeStyle = getComputedStyle(canvas!).color;
       ctx!.lineCap = "round";
       for (let i = 1; i < points.length; i++) {
