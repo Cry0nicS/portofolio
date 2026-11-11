@@ -48,7 +48,7 @@ const contact = [
     "in/adrian-popescu",
   ],
   ["GitHub", "https://github.com/Cry0nicS", "Cry0nicS"],
-  ["Email", "mailto:hi@adrianpopescu.dev", "hi@adrianpopescu.dev"],
+  ["Email", "mailto:contact@adrianpopescu.dev", "contact@adrianpopescu.dev"],
 ];
 
 function Logo() {

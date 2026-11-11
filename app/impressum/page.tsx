@@ -13,20 +13,20 @@ export default function Impressum() {
       <h1>Impressum</h1>
 
       <h2>Angaben gemäß § 5 DDG</h2>
-      {/* TODO(Adrian): ladungsfähige Anschrift eintragen, vorher nicht live schalten. */}
       <p>
         Adrian Popescu
         <br />
-        [Straße und Hausnummer]
+        Willdenowstr.
         <br />
-        [PLZ] Berlin
+        13353 Berlin
         <br />
         Deutschland
       </p>
 
       <h2>Kontakt</h2>
       <p>
-        E-Mail: <a href="mailto:hi@adrianpopescu.dev">hi@adrianpopescu.dev</a>
+        E-Mail:{" "}
+        <a href="mailto:contact@adrianpopescu.dev">contact@adrianpopescu.dev</a>
       </p>
 
       <h2>Verantwortlich für den Inhalt gemäß § 18 Abs. 2 MStV</h2>
