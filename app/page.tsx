@@ -11,17 +11,10 @@ import {
   experience,
 } from "./content";
 import { PenTrail } from "./pen-trail";
+import { ReleaseIndex } from "./release-index";
 import "./home.css";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
-
-const index = [
-  ["#v3", "v3.0", "ai-first", "2022 – now"],
-  ["#berlin", "v2.0", "berlin", "2020 – 2022"],
-  ["#esports", "v1.0", "esports", "2012 – 2022"],
-  ["#after-hours", "ext", "side quests", "after hours"],
-  ["#experience", "log", "version history", "2013 – now"],
-];
 
 const marks = { add: "+", change: "~", remove: "−", next: "›" };
 
@@ -85,19 +78,7 @@ export default function Home() {
           Changelog
           <span className="cl-badge">v3.0 current</span>
         </p>
-        <nav aria-label="Releases">
-          <ol className="cl-index">
-            {index.map(([href, version, name, years]) => (
-              <li key={href}>
-                <a href={href}>
-                  <span className="cl-index-ver">{version}</span>
-                  <span className="cl-index-name">{name}</span>
-                  <span className="cl-index-years">{years}</span>
-                </a>
-              </li>
-            ))}
-          </ol>
-        </nav>
+        <ReleaseIndex />
         <p className="cl-side-label">Status</p>
         <ul className="cl-now">
           {now.map((item) => (

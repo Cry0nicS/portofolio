@@ -282,6 +282,13 @@ svg {
   }
 }
 
+@media (max-width: 900px) {
+  /* Clear the homepage release dock */
+  .toast {
+    bottom: 5.5rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

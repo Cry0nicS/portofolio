@@ -75,7 +75,7 @@
   background: var(--bg);
   transition: border-color 0.2s;
 }
-.changelog .cl-index li:first-child a::before {
+.changelog .cl-index a[aria-current]::before {
   border-color: var(--accent);
   background: var(--accent);
 }
@@ -93,6 +93,9 @@
 .changelog .cl-index-ver {
   color: var(--accent);
   font-weight: 600;
+}
+.changelog .cl-index-short {
+  display: none;
 }
 .changelog .cl-index-years {
   grid-column: 2;
@@ -476,24 +479,29 @@
   .changelog .cl-main {
     max-width: none;
   }
-  /* The release index turns into a slim bar that sticks to the top while you read */
+  /* The release index becomes a dock at the bottom of the screen, in thumb reach */
   .changelog .cl-side {
-    top: 0;
+    position: fixed;
+    inset: auto 0.75rem 0.75rem;
+    top: auto;
     z-index: 12;
     max-height: none;
     overflow: visible;
-    margin-inline: -1.25rem;
-    padding-inline: 1.25rem;
-    background: var(--bg);
-    border-bottom: 1px solid var(--hair);
+    padding: 0.25rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: color-mix(in oklab, var(--card) 92%, transparent);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
   }
   .changelog .cl-index {
-    display: flex;
-    justify-content: space-between;
-    margin: 0 -0.5rem;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin: 0;
   }
   .changelog .cl-index::before,
   .changelog .cl-index a::before,
+  .changelog .cl-index-name,
   .changelog .cl-index-years,
   .changelog .cl-side-title,
   .changelog .cl-side-label,
@@ -501,11 +509,31 @@
     display: none;
   }
   .changelog .cl-index a {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    min-height: 48px;
-    padding: 0 0.5rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    align-content: center;
+    gap: 0;
+    min-height: 50px;
+    padding: 0.25rem 0;
+    border-radius: 10px;
+    line-height: 1.3;
+  }
+  .changelog .cl-index-short {
+    display: block;
+    color: var(--muted);
+    font-size: clamp(
+      0.6875rem,
+      3.2vw,
+      0.75rem
+    ); /* "ai-first" must fit a fifth of 320px */
+    white-space: nowrap;
+  }
+  .changelog .cl-index a[aria-current] {
+    background: color-mix(in oklab, var(--accent) 14%, var(--card));
+  }
+  .changelog .cl-index a[aria-current] .cl-index-short {
+    color: var(--text);
   }
   .changelog .cl-now.cl-now-inline {
     display: grid;
@@ -514,16 +542,6 @@
     border-top: 1px solid var(--hair);
     font-family: var(--mono);
     font-size: 0.8125rem;
-  }
-  html:has(.changelog) {
-    scroll-padding-top: 4.5rem;
-  }
-}
-
-@media (max-width: 680px) {
-  /* Version tags only, so all five fit without scrolling */
-  .changelog .cl-index-name {
-    display: none;
   }
 }
 
