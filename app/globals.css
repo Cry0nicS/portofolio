@@ -179,6 +179,25 @@ svg {
   border-color: var(--accent);
   transform: rotate(-12deg);
 }
+.tools {
+  display: flex;
+  gap: 0.5rem;
+}
+.trail-off {
+  display: none;
+}
+[data-trail="off"] .trail-off {
+  display: inline;
+}
+[data-trail="off"] .trail-toggle path:not(.trail-off) {
+  opacity: 0.35;
+}
+/* The trail follows a mouse only and never runs under reduced motion: no switch where it does nothing */
+@media (any-hover: none), (prefers-reduced-motion: reduce) {
+  .trail-toggle {
+    display: none;
+  }
+}
 
 /* Footer */
 .footer {

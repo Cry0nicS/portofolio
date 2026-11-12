@@ -10,7 +10,6 @@ import {
   sideProjects,
   experience,
 } from "./content";
-import { PenTrail } from "./pen-trail";
 import { ReleaseIndex } from "./release-index";
 import "./home.css";
 
@@ -72,7 +71,6 @@ function ReleaseHead({
 export default function Home() {
   return (
     <div className="changelog wrap">
-      <PenTrail />
       <aside className="cl-side" aria-label="Release index">
         <p className="cl-side-title">
           Changelog

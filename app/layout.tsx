@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { Konami, ThemeToggle } from "./controls";
+import { PenTrail, PenTrailToggle } from "./pen-trail";
 import "./globals.css";
 
 // next/font downloads Geist at build time and serves it from this domain: no Google requests at runtime.
@@ -31,8 +32,8 @@ export const metadata: Metadata = {
   },
 };
 
-// Runs before first paint so a saved theme never flashes.
-const restorePrefs = `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
+// Runs before first paint so a saved theme never flashes and the trail switch starts in its saved state.
+const restorePrefs = `try{var d=document.documentElement.dataset,t=localStorage.getItem("theme");if(t==="light"||t==="dark")d.theme=t;if(localStorage.getItem("trail")==="off")d.trail="off"}catch(e){}`;
 
 const links = [
   ["/#esports", "esports"],
@@ -107,7 +108,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               </Link>
             ))}
           </nav>
-          <ThemeToggle />
+          <div className="tools">
+            <PenTrailToggle />
+            <ThemeToggle />
+          </div>
         </header>
 
         <main id="main">{children}</main>
@@ -137,6 +141,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </footer>
 
         <Konami />
+        <PenTrail />
       </body>
     </html>
   );
