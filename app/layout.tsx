@@ -63,31 +63,35 @@ const contact = [
 
 function Logo() {
   return (
-    <svg viewBox="0 0 32 32" aria-hidden="true">
+    // Workflow Handoff: two interlocking hooks carrying one n8n-style run, trigger → handoff → agent → output.
+    <svg className="logo" viewBox="-3 -3 143 102" aria-hidden="true">
       <path
-        d="M9 2.5h14a2 2 0 0 1 2 2V23a6.5 6.5 0 0 1-6.5 6.5H9a2 2 0 0 1-2-2v-23a2 2 0 0 1 2-2z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <rect
-        className="logo-screen"
-        x="10.5"
-        y="6"
-        width="11"
-        height="8.5"
-        rx="1.2"
+        className="logo-ink"
+        d="M0 62L17 14C21 5 28 0 40 0H117Q121 0 121 4V25Q121 29 117 29H60C54 29 51 31 48 37L37 62Z"
       />
       <path
-        d="M13.5 18.5v5M11 21h5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
+        className="logo-accent"
+        d="M88 59L97 38Q99 34 103 34H120L129 19Q131 16 134.5 16Q138 16 137 20L122 74C117 89 106 96 90 96H22Q14 96 14 88V75Q14 67 22 67H76C82 67 85 65 88 59Z"
       />
-      <circle cx="19.2" cy="23" r="1.4" fill="currentColor" />
-      <circle cx="22.2" cy="20" r="1.4" fill="currentColor" />
+      <g className="logo-route">
+        <path
+          pathLength="100"
+          d="M23 48L28.5 32Q33 17 50 17H113V48L107.5 64Q103 79 86 79H23M58 79V90"
+        />
+        <path
+          className="logo-pulse"
+          pathLength="100"
+          d="M23 48L28.5 32Q33 17 50 17H113V48L107.5 64Q103 79 86 79H23"
+        />
+        <circle cx="23" cy="48" r="5.5" />
+        <circle cx="50" cy="17" r="5.5" />
+        <circle cx="113" cy="17" r="5.5" />
+        <circle cx="113" cy="48" r="5.5" />
+        <circle cx="86" cy="79" r="5.5" />
+        <circle cx="58" cy="79" r="5.5" />
+        <circle cx="58" cy="90" r="3.5" />
+        <circle cx="23" cy="79" r="5.5" />
+      </g>
     </svg>
   );
 }

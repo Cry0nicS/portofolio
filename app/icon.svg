@@ -1,19 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-3 -23 143 143">
   <style>
-    .ink { stroke: #221d16; }
-    .dot { fill: #221d16; }
-    .body { fill: #f4eee1; }
-    .screen { fill: #2c6a3a; }
+    .a { fill: #221d16; }
+    .b { fill: #2c6a3a; }
+    .r { fill: none; stroke: #f4eee1; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
     @media (prefers-color-scheme: dark) {
-      .ink { stroke: #ece4d6; }
-      .dot { fill: #ece4d6; }
-      .body { fill: #191613; }
-      .screen { fill: #8fce9a; }
+      .a { fill: #ece4d6; }
+      .b { fill: #8fce9a; }
+      .r { stroke: #191613; }
     }
   </style>
-  <path class="ink body" d="M9 2.5h14a2 2 0 0 1 2 2V23a6.5 6.5 0 0 1-6.5 6.5H9a2 2 0 0 1-2-2v-23a2 2 0 0 1 2-2z" stroke-width="2" stroke-linejoin="round"/>
-  <rect class="screen" x="10.5" y="6" width="11" height="8.5" rx="1.2"/>
-  <path class="ink" d="M13.5 18.5v5M11 21h5" fill="none" stroke-width="2.2" stroke-linecap="round"/>
-  <circle class="dot" cx="19.2" cy="23" r="1.4"/>
-  <circle class="dot" cx="22.2" cy="20" r="1.4"/>
+  <path class="a" d="M0 62L17 14C21 5 28 0 40 0H117Q121 0 121 4V25Q121 29 117 29H60C54 29 51 31 48 37L37 62Z"/>
+  <path class="b" d="M88 59L97 38Q99 34 103 34H120L129 19Q131 16 134.5 16Q138 16 137 20L122 74C117 89 106 96 90 96H22Q14 96 14 88V75Q14 67 22 67H76C82 67 85 65 88 59Z"/>
+  <path class="r" d="M23 48L28.5 32Q33 17 50 17H113V48L107.5 64Q103 79 86 79H23"/>
 </svg>
