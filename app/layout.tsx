@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, IBM_Plex_Mono } from "next/font/google";
 import Link from "next/link";
 import { Konami, ThemeToggle } from "./controls";
 import { PenTrail, PenTrailToggle } from "./pen-trail";
@@ -13,9 +13,12 @@ const bricolage = Bricolage_Grotesque({
   axes: ["opsz"],
   display: "swap",
 });
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+// Plex Mono is not variable: load only the weights the CSS uses for mono text (400, 500, 600), no italics.
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  weight: ["400", "500", "600"],
+  subsets: ["latin", "latin-ext"],
+  display: "swap",
 });
 
 const description =
@@ -93,7 +96,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${bricolage.variable} ${geistMono.variable}`}
+      className={`${bricolage.variable} ${plexMono.variable}`}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >

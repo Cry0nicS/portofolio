@@ -48,7 +48,7 @@ export default function Datenschutz() {
 
       <h2>Schriftarten</h2>
       <p>
-        Die Schriftarten Bricolage Grotesque und Geist Mono werden von dieser
+        Die Schriftarten Bricolage Grotesque und IBM Plex Mono werden von dieser
         Domain ausgeliefert. Es findet keine Verbindung zu Google Fonts oder
         anderen Schrift-Diensten statt.
       </p>
