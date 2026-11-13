@@ -160,6 +160,15 @@
 .changelog .cl-release + .cl-release {
   margin-top: clamp(4rem, 9vw, 6.5rem);
 }
+/* Arena drawing between two releases; takes the place of the gap a release would leave */
+.changelog .cl-arena {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4.2;
+  margin-block: clamp(2.5rem, 6vw, 4rem);
+  color: var(--accent);
+  pointer-events: none;
+}
 .changelog .cl-release > * + *,
 .changelog .cl-notes > * + * {
   margin-top: 1.25rem;
@@ -562,6 +571,9 @@
 }
 
 @media (max-width: 560px) {
+  .changelog .cl-arena {
+    aspect-ratio: 3.2;
+  }
   .changelog .cl-table tbody th {
     white-space: normal;
   }

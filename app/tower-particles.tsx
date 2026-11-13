@@ -2,23 +2,9 @@
 
 // The Berlin TV tower as a cloud of accent-coloured dots that scatter from the mouse and settle back.
 import { useEffect, useRef } from "react";
+import { runParticles } from "./particles";
 
 const TOWER_M = 368; // real height in metres; the shape below is drawn in metres
-const RADIUS = 34; // px around the pointer that pushes dots away
-const PUSH = 1.6; // push strength at the pointer
-const SPRING = 0.05; // pull back towards home each frame
-const DAMPING = 0.86; // velocity kept each frame
-
-type Dot = {
-  hx: number;
-  hy: number;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  a: number;
-  p: number;
-};
 
 // Home points in metres: x centred on the axis, y up from the ground; a is the dot's opacity.
 function silhouette() {
@@ -58,130 +44,16 @@ export function TowerParticles() {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const canvas = ref.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
-    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!ref.current) return;
     const shape = silhouette();
-    let dots: Dot[] = [];
-    let width = 0;
-    let height = 0;
-    let mouse: { x: number; y: number } | null = null;
-    let onScreen = false;
-    let frame = 0;
-
-    function layout() {
-      width = canvas!.clientWidth;
-      height = canvas!.clientHeight;
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
-      canvas!.width = width * ratio;
-      canvas!.height = height * ratio;
-      ctx!.setTransform(ratio, 0, 0, ratio, 0, 0);
+    return runParticles(ref.current, (width, height) => {
       const scale = Math.min((height - 8) / TOWER_M, (width - 8) / 84);
-      const left = width / 2;
-      const bottom = height - 4;
-      dots = shape.map(([mx, my, a]) => {
-        const [hx, hy] = [left + mx * scale, bottom - my * scale];
-        return {
-          hx,
-          hy,
-          x: hx,
-          y: hy,
-          vx: 0,
-          vy: 0,
-          a,
-          p: Math.random() * 6.3,
-        };
-      });
-    }
-
-    function draw(now: number) {
-      ctx!.clearRect(0, 0, width, height);
-      ctx!.fillStyle = getComputedStyle(canvas!).color;
-      for (const d of dots) {
-        if (!still) {
-          // Idle shimmer: home sways a fraction of a pixel
-          const tx = d.hx + Math.sin(now / 900 + d.p) * 0.5;
-          const ty = d.hy + Math.cos(now / 1100 + d.p) * 0.5;
-          d.vx += (tx - d.x) * SPRING;
-          d.vy += (ty - d.y) * SPRING;
-          if (mouse) {
-            const dx = d.x - mouse.x;
-            const dy = d.y - mouse.y;
-            const dist = Math.hypot(dx, dy) || 1;
-            if (dist < RADIUS) {
-              const force = (1 - dist / RADIUS) * PUSH;
-              d.vx += (dx / dist) * force;
-              d.vy += (dy / dist) * force;
-            }
-          }
-          d.vx *= DAMPING;
-          d.vy *= DAMPING;
-          d.x += d.vx;
-          d.y += d.vy;
-        }
-        ctx!.globalAlpha = d.a;
-        ctx!.fillRect(d.x - 0.7, d.y - 0.7, 1.4, 1.4);
-      }
-    }
-
-    function loop(now: number) {
-      draw(now);
-      frame = requestAnimationFrame(loop);
-    }
-
-    // Runs only while the canvas is shown (not display:none on small screens), on screen and the tab is visible.
-    function update() {
-      const run = !still && onScreen && !document.hidden && width > 0;
-      if (run && !frame) frame = requestAnimationFrame(loop);
-      if (!run && frame) {
-        cancelAnimationFrame(frame);
-        frame = 0;
-      }
-      if (still && width > 0) draw(0);
-    }
-
-    function onMove(event: PointerEvent) {
-      if (event.pointerType !== "mouse") return;
-      const box = canvas!.getBoundingClientRect();
-      mouse = { x: event.clientX - box.left, y: event.clientY - box.top };
-    }
-    function onLeave() {
-      mouse = null;
-    }
-
-    const resizer = new ResizeObserver(() => {
-      layout();
-      update();
+      return shape.map(([mx, my, a]) => [
+        width / 2 + mx * scale,
+        height - 4 - my * scale,
+        a,
+      ]);
     });
-    const watcher = new IntersectionObserver(([entry]) => {
-      onScreen = entry.isIntersecting;
-      update();
-    });
-    // Still mode paints once, so repaint when the theme flips
-    const theme = new MutationObserver(update);
-    const scheme = window.matchMedia("(prefers-color-scheme: dark)");
-    resizer.observe(canvas);
-    watcher.observe(canvas);
-    theme.observe(document.documentElement, {
-      attributeFilter: ["data-theme"],
-    });
-    scheme.addEventListener("change", update);
-    document.addEventListener("visibilitychange", update);
-    if (!still) {
-      window.addEventListener("pointermove", onMove);
-      document.documentElement.addEventListener("pointerleave", onLeave);
-    }
-    return () => {
-      resizer.disconnect();
-      watcher.disconnect();
-      theme.disconnect();
-      scheme.removeEventListener("change", update);
-      document.removeEventListener("visibilitychange", update);
-      window.removeEventListener("pointermove", onMove);
-      document.documentElement.removeEventListener("pointerleave", onLeave);
-      cancelAnimationFrame(frame);
-    };
   }, []);
 
   return <canvas ref={ref} className="cl-tower" aria-hidden="true" />;
