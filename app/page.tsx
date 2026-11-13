@@ -11,6 +11,7 @@ import {
   experience,
 } from "./content";
 import { ReleaseIndex } from "./release-index";
+import { TowerParticles } from "./tower-particles";
 import "./home.css";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
@@ -77,6 +78,7 @@ export default function Home() {
           <span className="cl-badge">v3.0 current</span>
         </p>
         <ReleaseIndex />
+        <TowerParticles />
         <p className="cl-side-label">Status</p>
         <ul className="cl-now">
           {now.map((item) => (

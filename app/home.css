@@ -90,6 +90,21 @@
 .changelog .cl-index a:hover::before {
   border-color: var(--accent);
 }
+/* TV tower under the index; shrinks with the viewport so the sticky sidebar still fits */
+.changelog .cl-tower {
+  display: block;
+  width: 100%;
+  height: clamp(9rem, 100dvh - 39rem, 20rem);
+  margin-top: 1.25rem;
+  color: var(--accent);
+  pointer-events: none;
+}
+/* Too short for the tower beside the index and status */
+@media (max-height: 48rem) {
+  .changelog .cl-tower {
+    display: none;
+  }
+}
 .changelog .cl-index-ver {
   color: var(--accent);
   font-weight: 600;
@@ -505,6 +520,7 @@
   .changelog .cl-index-years,
   .changelog .cl-side-title,
   .changelog .cl-side-label,
+  .changelog .cl-tower,
   .changelog .cl-side .cl-now {
     display: none;
   }
