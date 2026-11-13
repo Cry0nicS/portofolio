@@ -48,9 +48,9 @@ export default function Datenschutz() {
 
       <h2>Schriftarten</h2>
       <p>
-        Die Schriftarten Geist Sans und Geist Mono werden von dieser Domain
-        ausgeliefert. Es findet keine Verbindung zu Google Fonts oder anderen
-        Schrift-Diensten statt.
+        Die Schriftarten Bricolage Grotesque und Geist Mono werden von dieser
+        Domain ausgeliefert. Es findet keine Verbindung zu Google Fonts oder
+        anderen Schrift-Diensten statt.
       </p>
 
       <h2>Kontakt per E-Mail</h2>

@@ -209,7 +209,7 @@
 .changelog h1 {
   font-size: clamp(3rem, 9vw, 5rem);
   line-height: 0.95;
-  letter-spacing: -0.055em;
+  letter-spacing: -0.035em;
 }
 .changelog h2 {
   max-width: 22ch;

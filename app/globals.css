@@ -8,7 +8,7 @@
   --border: light-dark(#d6cbb7, #3d362e);
   --accent: light-dark(#2c6a3a, #8fce9a);
   --on-accent: var(--bg);
-  --sans: var(--font-geist-sans), system-ui, sans-serif;
+  --sans: var(--font-bricolage), system-ui, sans-serif;
   --mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 :root[data-theme="light"] {
@@ -65,7 +65,7 @@ h1,
 h2,
 h3 {
   line-height: 1.05;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.025em;
   text-wrap: balance;
 }
 h2 {
