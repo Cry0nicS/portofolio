@@ -135,12 +135,117 @@ svg {
   font-weight: 600;
   letter-spacing: -0.01em;
 }
-.brand svg {
-  width: 30px;
+.brand .logo {
+  width: 42px;
   height: 30px;
 }
-.logo-screen {
+/* Not currentColor: the link hover colour would turn both hooks green. */
+.logo-ink {
+  fill: var(--text);
+}
+.logo-accent {
   fill: var(--accent);
+}
+/* Routes and nodes are cut out of the hooks in the page colour. */
+.logo-route path {
+  fill: none;
+  stroke: var(--bg);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.logo-route circle {
+  fill: var(--bg);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+/* A run executes once on load and loops while hovered: a wider pulse travels the route
+   (pathLength 100) and each node fires as it passes. Hover swaps to twin keyframes to restart. */
+.logo-route .logo-pulse {
+  stroke-width: 9;
+  stroke-dasharray: 6 200;
+  stroke-dashoffset: 6;
+  opacity: 0;
+  animation: logo-pulse 2.4s 0.4s linear;
+}
+.logo-route circle {
+  animation: logo-fire 2.4s calc(0.4s + var(--at) * 1.9s);
+}
+.brand:hover .logo-pulse {
+  animation: logo-pulse-hover 2.4s linear infinite;
+}
+.brand:hover .logo-route circle {
+  animation: logo-fire-hover 2.4s calc(var(--at) * 1.9s) infinite;
+}
+.logo-route circle:nth-of-type(1) {
+  --at: 0;
+}
+.logo-route circle:nth-of-type(2) {
+  --at: 0.17;
+}
+.logo-route circle:nth-of-type(3) {
+  --at: 0.43;
+}
+.logo-route circle:nth-of-type(4) {
+  --at: 0.57;
+}
+.logo-route circle:nth-of-type(5) {
+  --at: 0.74;
+}
+.logo-route circle:nth-of-type(6) {
+  --at: 0.85;
+}
+.logo-route circle:nth-of-type(7) {
+  --at: 0.92;
+}
+.logo-route circle:nth-of-type(8) {
+  --at: 1;
+}
+@keyframes logo-pulse {
+  0% {
+    stroke-dashoffset: 6;
+    opacity: 1;
+  }
+  79% {
+    stroke-dashoffset: -100;
+    opacity: 1;
+  }
+  80%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes logo-pulse-hover {
+  0% {
+    stroke-dashoffset: 6;
+    opacity: 1;
+  }
+  79% {
+    stroke-dashoffset: -100;
+    opacity: 1;
+  }
+  80%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes logo-fire {
+  0% {
+    transform: scale(1.5);
+  }
+  14%,
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes logo-fire-hover {
+  0% {
+    transform: scale(1.5);
+  }
+  14%,
+  100% {
+    transform: scale(1);
+  }
 }
 .nav {
   display: flex;
