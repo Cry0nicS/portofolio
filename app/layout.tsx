@@ -1,15 +1,24 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, IBM_Plex_Mono } from "next/font/google";
 import Link from "next/link";
 import { Konami, ThemeToggle } from "./controls";
 import { PenTrail, PenTrailToggle } from "./pen-trail";
 import "./globals.css";
 
-// next/font downloads Geist at build time and serves it from this domain: no Google requests at runtime.
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+// next/font downloads the fonts at build time and serves them from this domain: no Google requests at runtime.
+// opsz keeps Bricolage's optical sizes (tighter text cuts, characterful display cuts); latin-ext covers German.
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  subsets: ["latin", "latin-ext"],
+  axes: ["opsz"],
+  display: "swap",
+});
+// Plex Mono is not variable: load only the weights the CSS uses for mono text (400, 500, 600), no italics.
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  weight: ["400", "500", "600"],
+  subsets: ["latin", "latin-ext"],
+  display: "swap",
 });
 
 const description =
@@ -87,7 +96,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable}`}
+      className={`${bricolage.variable} ${plexMono.variable}`}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
