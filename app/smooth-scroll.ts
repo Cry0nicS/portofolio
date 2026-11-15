@@ -1,28 +1,42 @@
 // Paced scrolling for in-page links, slow enough to watch what scrolling drives on the way (the /about morphs).
 import type { MouseEvent } from "react";
 
-const PER_VIEWPORT = 800;
-const MIN = 350;
-const MAX = 1800;
+const PER_VIEWPORT = 300;
+const MIN = 400;
+const MAX = 900;
+const PER_STOP = 450;
+const CAP = 2500;
+// Speed through a passed point, as a share of the leg's average: slows, never stops
+const SLOW = 0.2;
 
-export function scrollDuration(distance: number, viewport: number) {
-  const ms = (Math.abs(distance) / viewport) * PER_VIEWPORT;
-  return Math.round(Math.min(MAX, Math.max(MIN, ms)));
+// Total time for a scroll: paced by distance, plus a beat for each waypoint passed, within bounds
+export function scrollDuration(distance: number, viewport: number, stops = 0) {
+  const ms = (Math.abs(distance) / viewport) * PER_VIEWPORT + 300;
+  return Math.round(
+    Math.min(CAP, Math.min(MAX, Math.max(MIN, ms)) + stops * PER_STOP),
+  );
 }
 
-const ease = (t: number) =>
-  t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
-
-// Where the scroll is `elapsed` ms in, easing each leg between consecutive points on its own
-export function scrollAt(points: number[], elapsed: number, viewport: number) {
-  for (let i = 1; i < points.length; i++) {
-    const [a, b] = [points[i - 1], points[i]];
-    const leg = scrollDuration(b - a, viewport);
-    if (elapsed < leg)
-      return { top: a + (b - a) * ease(elapsed / leg), done: false };
-    elapsed -= leg;
-  }
-  return { top: points[points.length - 1], done: true };
+/**
+ * Where the scroll is `elapsed` ms into `duration`, sharing the time equally between the legs from
+ * point to point. It leaves at twice a leg's average speed so the first frame already moves, slows
+ * through each inner point so what it drives there gets a moment to form, and comes to rest at the end.
+ */
+export function scrollAt(points: number[], elapsed: number, duration: number) {
+  const legs = points.length - 1;
+  const s = Math.min(1, Math.max(0, elapsed / duration)) * legs;
+  const i = Math.min(Math.floor(s), legs - 1);
+  const u = s - i;
+  const start = i === 0 ? 2 : SLOW;
+  const end = i === legs - 1 ? 0 : SLOW;
+  // Speed 1 + a·cos(πu) + b·cos(2πu) runs from `start` to `end` and covers the leg exactly
+  const [a, b] = [(start - end) / 2, (start + end) / 2 - 1];
+  const w =
+    u +
+    (a * Math.sin(Math.PI * u)) / Math.PI +
+    (b * Math.sin(2 * Math.PI * u)) / (2 * Math.PI);
+  const [from, to] = [points[i], points[i + 1]];
+  return { top: from + (to - from) * w, done: s >= legs };
 }
 
 // Where a native anchor jump would land: the scroller's scroll-padding plus the target's scroll-margin
@@ -45,7 +59,7 @@ let stop: (() => void) | null = null;
 /**
  * onClick for an in-page `#hash` link, or for any element holding them (a nav): animates the scroll,
  * then sets the hash and moves focus as the native jump would. `stops` selects elements passed on the
- * way that the scroll should settle on for a moment, as /about does for each chapter.
+ * way that the scroll should slow through, as /about does for each chapter.
  */
 export function smoothScrollClick(event: MouseEvent, stops?: string) {
   if (
@@ -80,7 +94,9 @@ export function smoothScrollClick(event: MouseEvent, stops?: string) {
     window.scrollTo({ top: to, behavior: "instant" });
     return arrive();
   }
-  const between = (y: number) => (y - from) * (y - to) < 0;
+  // Skip a stop the reader is already looking at: it is near where the scroll starts
+  const between = (y: number) =>
+    (y - from) * (y - to) < 0 && Math.abs(y - from) > window.innerHeight / 2;
   const passed = stops
     ? [...document.querySelectorAll(stops)].map(landing).filter(between)
     : [];
@@ -99,9 +115,11 @@ export function smoothScrollClick(event: MouseEvent, stops?: string) {
       signal: abort.signal,
     });
 
-  const start = performance.now();
+  const duration = scrollDuration(to - from, window.innerHeight, passed.length);
+  // Count from a frame before the click so the very first frame already moves
+  const start = performance.now() - 16;
   let frame = requestAnimationFrame(function step(now) {
-    const { top, done } = scrollAt(points, now - start, window.innerHeight);
+    const { top, done } = scrollAt(points, now - start, duration);
     window.scrollTo({ top, behavior: "instant" });
     if (!done) frame = requestAnimationFrame(step);
     else {

@@ -17,7 +17,7 @@ export function Story() {
       <nav
         className="ab-rail mono"
         aria-label="Chapters"
-        // Settle on every chapter passed so each shape forms on the way
+        // Slow through every chapter passed so each shape forms on the way
         onClick={(event) => smoothScrollClick(event, "[data-chapter]")}
       >
         <p className="ab-rail-now" aria-hidden="true">
