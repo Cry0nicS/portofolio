@@ -64,13 +64,13 @@ export function PenTrail() {
     const canvas = ref.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     let points: { x: number; y: number; t: number }[] = [];
     let frame = 0;
 
     function resize() {
-      const ratio = window.devicePixelRatio || 1;
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
       // Size from the element, not the window: its box excludes a classic scrollbar.
       canvas!.width = canvas!.clientWidth * ratio;
       canvas!.height = canvas!.clientHeight * ratio;
@@ -99,7 +99,7 @@ export function PenTrail() {
     }
 
     function onMove(event: PointerEvent) {
-      if (event.pointerType !== "mouse" || !isOn()) return;
+      if (event.pointerType !== "mouse" || !isOn() || reduced.matches) return;
       points.push({ x: event.clientX, y: event.clientY, t: performance.now() });
       if (!frame) frame = requestAnimationFrame(draw);
     }

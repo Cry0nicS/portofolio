@@ -26,13 +26,13 @@ Ten years inside esports (engineer at GosuGamers, admin and referee at The Inter
 
 ## Brand Commitments
 
-- Workflow Handoff logo (app/layout.tsx): two interlocking hooks carrying one n8n-style run, trigger, handoff, agent, output.
+- Workflow Handoff logo (app/site-header.tsx): two interlocking hooks carrying one n8n-style run, trigger, handoff, agent, output.
 - Interactive particle drawings (Berlin TV tower, esports arena) that scatter from the mouse are part of the site's voice.
 - Voice: plain, first person, short sentences, no hype.
 
 ## Evidence on Hand
 
-All facts live in app/content.ts and app/page.tsx. Confirmed for the story: first code was written for games; BSc Computer Science at TU Cluj-Napoca with a thesis on multi-agent systems for traffic routing (AI, roughly 15 years ago). No other early-life specifics are confirmed: do not invent PC builds, LAN parties, first games or dates before 2012.
+All facts live in app/content.ts, app/page.tsx and app/about/page.tsx. Confirmed for the story: first code was written for games; BSc Computer Science at TU Cluj-Napoca with a thesis on multi-agent systems for traffic routing (AI, roughly 15 years ago). No other early-life specifics are confirmed: do not invent PC builds, LAN parties, first games or dates before 2012.
 
 ## Product Principles
 

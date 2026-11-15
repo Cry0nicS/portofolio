@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, IBM_Plex_Mono } from "next/font/google";
-import Link from "next/link";
-import { Konami, ThemeToggle } from "./controls";
-import { PenTrail, PenTrailToggle } from "./pen-trail";
-import { SiteNav } from "./site-nav";
-import {
-  LOGO_ACCENT,
-  LOGO_INK,
-  LOGO_NODES,
-  LOGO_ROUTE,
-  LOGO_ROUTE_MAIN,
-} from "./logo";
+import { Konami } from "./controls";
+import { PenTrail } from "./pen-trail";
+import { og, site, tagline, titleTemplate } from "./site";
+import { SiteFooter } from "./site-footer";
+import { SiteHeader } from "./site-header";
 import "./globals.css";
 
 // next/font downloads the fonts at build time and serves them from this domain: no Google requests at runtime.
@@ -29,55 +23,22 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-const description =
-  "Adrian Popescu: Technical Product Owner in Berlin. Ten years building esports platforms and running tournaments, now AI-first work that enables teams and improves products.";
-
 export const metadata: Metadata = {
-  metadataBase: new URL("https://adrianpopescu.dev"),
+  metadataBase: new URL(site.origin),
   title: {
-    default: "Adrian Popescu · Builder first.",
-    template: "%s · Adrian Popescu",
+    default: tagline,
+    template: titleTemplate,
   },
-  description,
+  description: og.description,
   openGraph: {
-    type: "website",
+    ...og,
     url: "/",
-    siteName: "Adrian Popescu",
-    title: "Adrian Popescu · Builder first.",
-    description,
-    locale: "en_US",
+    title: { default: tagline, template: titleTemplate },
   },
 };
 
 // Runs before first paint so a saved theme never flashes and the trail switch starts in its saved state.
 const restorePrefs = `try{var d=document.documentElement.dataset,t=localStorage.getItem("theme");if(t==="light"||t==="dark")d.theme=t;if(localStorage.getItem("trail")==="off")d.trail="off"}catch(e){}`;
-
-const contact = [
-  [
-    "LinkedIn",
-    "https://www.linkedin.com/in/adrian-popescu",
-    "in/adrian-popescu",
-  ],
-  ["GitHub", "https://github.com/Cry0nicS", "Cry0nicS"],
-  ["Email", "mailto:contact@adrianpopescu.dev", "contact@adrianpopescu.dev"],
-];
-
-function Logo() {
-  return (
-    // Workflow Handoff: two interlocking hooks carrying one n8n-style run, trigger → handoff → agent → output.
-    <svg className="logo" viewBox="-3 -3 143 102" aria-hidden="true">
-      <path className="logo-ink" d={LOGO_INK} />
-      <path className="logo-accent" d={LOGO_ACCENT} />
-      <g className="logo-route">
-        <path pathLength="100" d={LOGO_ROUTE} />
-        <path className="logo-pulse" pathLength="100" d={LOGO_ROUTE_MAIN} />
-        {LOGO_NODES.map(([cx, cy, r]) => (
-          <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={r} />
-        ))}
-      </g>
-    </svg>
-  );
-}
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -92,43 +53,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <a className="skip" href="#main">
           Skip to content
         </a>
-        <header className="wrap header">
-          <Link className="brand" href="/" aria-label="Adrian Popescu, home">
-            <Logo />
-            <span>Adrian Popescu</span>
-          </Link>
-          <SiteNav />
-          <div className="tools">
-            <PenTrailToggle />
-            <ThemeToggle />
-          </div>
-        </header>
+        <SiteHeader />
 
         <main id="main">{children}</main>
 
-        <footer className="wrap footer" id="contact">
-          <h2>Adrian Popescu</h2>
-          <p className="muted" style={{ marginTop: "0.75rem" }}>
-            Technical Product Owner · Website, AI &amp; Automation · Berlin
-          </p>
-          <ul className="contact">
-            {contact.map(([name, href, handle]) => (
-              <li key={name}>
-                <a href={href}>
-                  {name}
-                  <span className="mono">{handle}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-          <div className="colophon mono">
-            <p>Built in Berlin, 2026. GG.</p>
-            <p>
-              <Link href="/impressum">Impressum</Link> ·{" "}
-              <Link href="/datenschutz">Datenschutz</Link>
-            </p>
-          </div>
-        </footer>
+        <SiteFooter />
 
         <Konami />
         <PenTrail />
