@@ -5,11 +5,12 @@ import { smoothScrollClick } from "./smooth-scroll";
 
 // href, version tag, name, years, short name for the bottom bar on small screens
 const index = [
-  ["#v3", "v3.0", "ai-first", "2022 – now", "ai-first"],
+  ["#v3", "v3.0", "ai-first", "2022 – now", "ai"],
   ["#berlin", "v2.0", "berlin", "2020 – 2022", "berlin"],
   ["#esports", "v1.0", "esports", "2012 – 2022", "esports"],
   ["#after-hours", "ext", "side quests", "after hours", "quests"],
   ["#experience", "log", "version history", "2013 – now", "history"],
+  ["#contact", "msg", "contact", "get in touch", "contact"],
 ];
 
 export function ReleaseIndex() {
@@ -17,10 +18,15 @@ export function ReleaseIndex() {
 
   // Mark the release being read: the one crossing a line 40% down the viewport.
   useEffect(() => {
+    // The footer is short: on tall screens it never reaches the line, so the page end counts as contact.
+    const atEnd = () =>
+      window.innerHeight + window.scrollY >=
+      document.documentElement.scrollHeight - 2;
+    const last = index[index.length - 1][0];
     const observer = new IntersectionObserver(
       (entries) => {
         const hit = entries.find((entry) => entry.isIntersecting);
-        if (hit) setCurrent(`#${hit.target.id}`);
+        if (hit) setCurrent(atEnd() ? last : `#${hit.target.id}`);
       },
       { rootMargin: "-40% 0px -60% 0px" },
     );
@@ -28,7 +34,14 @@ export function ReleaseIndex() {
       const section = document.querySelector(href);
       if (section) observer.observe(section);
     }
-    return () => observer.disconnect();
+    const onScroll = () => {
+      if (atEnd()) setCurrent(last);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   return (

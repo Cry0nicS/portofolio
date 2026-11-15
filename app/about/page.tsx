@@ -113,7 +113,8 @@ export default function About() {
             <Link className="ab-btn ab-btn-primary" href="/#work">
               See the work
             </Link>
-            <a className="ab-btn" href="#contact">
+            {/* The contact footer is already on screen under this button, so the button writes instead of jumping */}
+            <a className="ab-btn" href="mailto:contact@adrianpopescu.dev">
               Get in touch
             </a>
           </p>
