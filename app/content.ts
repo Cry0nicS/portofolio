@@ -108,3 +108,44 @@ export const experience = [
   ["2015 — 2018", "Esports Addicts", "Founder & Project Manager"],
   ["2013 — 2015", "CGM Clinical Österreich", "Software Engineer"],
 ];
+
+// Each Release's header details and short dock label; bodies live in page.tsx.
+export const releases = [
+  {
+    id: "v3",
+    version: "v3.0",
+    name: "ai-first",
+    years: "2022 – now",
+    short: "ai",
+  },
+  {
+    id: "berlin",
+    version: "v2.0",
+    name: "berlin",
+    years: "2020 – 2022",
+    short: "berlin",
+  },
+  {
+    id: "esports",
+    version: "v1.0",
+    name: "esports",
+    years: "2012 – 2022",
+    short: "esports",
+  },
+  {
+    id: "after-hours",
+    version: "ext",
+    name: "side quests",
+    years: "after hours",
+    short: "quests",
+  },
+  {
+    id: "experience",
+    version: "log",
+    name: "version history",
+    years: "2013 – now",
+    short: "history",
+  },
+] as const;
+
+export type ReleaseId = (typeof releases)[number]["id"];

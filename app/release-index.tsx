@@ -1,20 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { releases } from "./content";
 import { smoothScrollClick } from "./smooth-scroll";
 
-// href, version tag, name, years, short name for the bottom bar on small screens
+// Contact is the footer, not a Release: it stays the fixed last entry.
 const index = [
-  ["#v3", "v3.0", "ai-first", "2022 – now", "ai"],
-  ["#berlin", "v2.0", "berlin", "2020 – 2022", "berlin"],
-  ["#esports", "v1.0", "esports", "2012 – 2022", "esports"],
-  ["#after-hours", "ext", "side quests", "after hours", "quests"],
-  ["#experience", "log", "version history", "2013 – now", "history"],
-  ["#contact", "msg", "contact", "get in touch", "contact"],
+  ...releases.map(
+    (r) => [`#${r.id}`, r.version, r.name, r.years, r.short] as const,
+  ),
+  ["#contact", "msg", "contact", "get in touch", "contact"] as const,
 ];
 
 export function ReleaseIndex() {
-  const [current, setCurrent] = useState(index[0][0]);
+  const [current, setCurrent] = useState<string>(index[0][0]);
 
   // Mark the release being read: the one crossing a line 40% down the viewport.
   useEffect(() => {
