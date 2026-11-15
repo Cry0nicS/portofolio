@@ -115,3 +115,8 @@ dist
 # next.js / vercel
 next-env.d.ts
 .vercel
+
+# impeccable runtime output (screenshots, mocks, hook cache)
+/.impeccable/review/
+/.impeccable/mocks/
+/.impeccable/hook.cache.json
