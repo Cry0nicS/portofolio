@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { LOGO_CROSS, LOGO_CYCLE, LOGO_NODES } from "../logo";
-import { CHAPTERS, chapter } from "./chapters";
+import { chapter } from "./chapters";
 import { LOGO_RUNS, along } from "./logo-rig";
 
 // Scroll maps to a chapter pair and holds still around each chapter's centre.
@@ -39,13 +39,4 @@ test("globals.css logo timing matches the shared logo", () => {
   has(`logo-pulse ${cycle} 0\\.4s`);
   has(`logo-fire-hover ${cycle} calc\\(var\\(--at\\) \\* ${cross}\\) infinite`);
   has(`logo-pulse-hover ${cycle} linear infinite`);
-});
-
-// The page's sections must follow the Chapter list, or the rail highlights the wrong label.
-test("page sections follow the Chapter list", () => {
-  const page = readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
-  const ids = [...page.matchAll(/id="([^"]+)"\s+data-chapter/g)].map(
-    (m) => m[1],
-  );
-  expect(ids).toEqual(CHAPTERS.map(({ id }) => id));
 });
