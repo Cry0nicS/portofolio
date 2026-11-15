@@ -9,6 +9,8 @@ import {
   projects,
   sideProjects,
   experience,
+  releases,
+  type ReleaseId,
 } from "./content";
 import { ReleaseIndex } from "./release-index";
 import { TowerParticles } from "./tower-particles";
@@ -45,28 +47,22 @@ function Item({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function ReleaseHead({
-  version,
-  name,
-  years,
-  latest,
-}: {
-  version: string;
-  name: string;
-  years: string;
-  latest?: boolean;
-}) {
+function Release({ id, children }: { id: ReleaseId; children: ReactNode }) {
+  const r = releases.find((r) => r.id === id)!;
   return (
-    <header className="cl-head">
-      <p className="cl-ver">
-        <span className="cl-num">{version}</span>
-        <span className="cl-name">{name}</span>
-      </p>
-      <p className="cl-date">
-        {latest && <span className="cl-badge">latest</span>}
-        {years}
-      </p>
-    </header>
+    <article className="cl-release" id={id}>
+      <header className="cl-head">
+        <p className="cl-ver">
+          <span className="cl-num">{r.version}</span>
+          <span className="cl-name">{r.name}</span>
+        </p>
+        <p className="cl-date">
+          {r === releases[0] && <span className="cl-badge">latest</span>}
+          {r.years}
+        </p>
+      </header>
+      {children}
+    </article>
   );
 }
 
@@ -76,7 +72,7 @@ export default function Home() {
       <aside className="cl-side" aria-label="Release index">
         <p className="cl-side-title">
           Changelog
-          <span className="cl-badge">v3.0 current</span>
+          <span className="cl-badge">{releases[0].version} current</span>
         </p>
         <ReleaseIndex />
         <TowerParticles />
@@ -89,13 +85,7 @@ export default function Home() {
       </aside>
 
       <div className="cl-main">
-        <article className="cl-release" id="v3">
-          <ReleaseHead
-            version="v3.0"
-            name="ai-first"
-            years="2022 – now"
-            latest
-          />
+        <Release id="v3">
           <h1>Builder first.</h1>
           <p className="cl-lead">
             Technical Product Owner at mkk meine-krankenkasse, leading the
@@ -173,10 +163,9 @@ export default function Home() {
               <Item title="Workshops and hackathons">Next up.</Item>
             </Group>
           </section>
-        </article>
+        </Release>
 
-        <article className="cl-release" id="berlin">
-          <ReleaseHead version="v2.0" name="berlin" years="2020 – 2022" />
+        <Release id="berlin">
           <h2>Then the arenas went quiet.</h2>
           <p>
             Same habits, different stakes: millions of insured people,
@@ -206,12 +195,11 @@ export default function Home() {
               insurer.
             </Item>
           </Group>
-        </article>
+        </Release>
 
         <ArenaParticles />
 
-        <article className="cl-release" id="esports">
-          <ReleaseHead version="v1.0" name="esports" years="2012 – 2022" />
+        <Release id="esports">
           <h2>Ten years in the server room of esports.</h2>
           <p>
             I started as a volunteer in 2012, helping turn a weekend Dota 2
@@ -251,10 +239,9 @@ export default function Home() {
               ))}
             </ol>
           </section>
-        </article>
+        </Release>
 
-        <article className="cl-release" id="after-hours">
-          <ReleaseHead version="ext" name="side quests" years="after hours" />
+        <Release id="after-hours">
           <h2>Things I build after hours.</h2>
           <ul className="cl-plugins">
             {sideProjects.map(([title, text, tag, href, host]) => (
@@ -273,14 +260,9 @@ export default function Home() {
               </li>
             ))}
           </ul>
-        </article>
+        </Release>
 
-        <article className="cl-release" id="experience">
-          <ReleaseHead
-            version="log"
-            name="version history"
-            years="2013 – now"
-          />
+        <Release id="experience">
           <h2>Experience</h2>
           <table className="cl-table">
             <thead>
@@ -304,7 +286,7 @@ export default function Home() {
             BSc Computer Science, Technical University of Cluj-Napoca · thesis
             on multi-agent systems for traffic routing. Certification: CSPO.
           </p>
-        </article>
+        </Release>
       </div>
     </div>
   );
