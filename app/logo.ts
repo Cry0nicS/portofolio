@@ -1,4 +1,4 @@
-// Workflow Handoff mark, shared by the header logo (layout.tsx) and the /about particle logo; no browser APIs, so the server can import it.
+// Workflow Handoff mark, shared by the header logo (site-header.tsx) and the /about particle logo; no browser APIs, so the server can import it.
 export const LOGO_INK =
   "M0 62L17 14C21 5 28 0 40 0H117Q121 0 121 4V25Q121 29 117 29H60C54 29 51 31 48 37L37 62Z";
 export const LOGO_ACCENT =
