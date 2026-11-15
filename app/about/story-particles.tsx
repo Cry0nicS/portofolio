@@ -25,15 +25,91 @@ const LOGO_ACCENT =
   "M88 59L97 38Q99 34 103 34H120L129 19Q131 16 134.5 16Q138 16 137 20L122 74C117 89 106 96 90 96H22Q14 96 14 88V75Q14 67 22 67H76C82 67 85 65 88 59Z";
 const LOGO_ROUTE =
   "M23 48L28.5 32Q33 17 50 17H113V48L107.5 64Q103 79 86 79H23M58 79V90";
-const LOGO_NODES = [
-  [23, 48],
-  [50, 17],
-  [113, 17],
-  [113, 48],
-  [86, 79],
-  [58, 79],
-  [23, 79],
+// Each node: x, y, radius, and when the header pulse reaches it (--at in globals.css)
+export const LOGO_NODES = [
+  [23, 48, 5.5, 0],
+  [50, 17, 5.5, 0.17],
+  [113, 17, 5.5, 0.43],
+  [113, 48, 5.5, 0.57],
+  [86, 79, 5.5, 0.74],
+  [58, 79, 5.5, 0.85],
+  [58, 90, 3.5, 0.92],
+  [23, 79, 5.5, 1],
 ];
+const PAD = 3; // the logo is drawn this far in from the shape's edge
+
+// The header logo's run (globals.css): the pulse crosses the route in 1.9s of every 2.4s, and each node swells 1.5x as it passes
+const CYCLE = 2400;
+const CROSS = 1900;
+const SWELL = 0.14 * CYCLE; // how long a node takes to shrink back
+const PULSE = 0.03; // half the pulse's length, a dash of 6 on a route of pathLength 100
+const SPIN = (Math.PI * 2) / (CYCLE * 4); // node dots turn once every four runs
+
+// Points along a run, x then y; a 4-number segment is a quadratic curve (control point, end), flattened into short lines
+function polyline(...segments: number[][]) {
+  const out = segments[0].slice();
+  for (const s of segments.slice(1)) {
+    if (s.length === 2) {
+      out.push(...s);
+      continue;
+    }
+    const x0 = out[out.length - 2];
+    const y0 = out[out.length - 1];
+    for (let k = 1; k <= 8; k++) {
+      const u = k / 8;
+      const m = 1 - u;
+      out.push(
+        m * m * x0 + 2 * m * u * s[0] + u * u * s[2],
+        m * m * y0 + 2 * m * u * s[1] + u * u * s[3],
+      );
+    }
+  }
+  return out;
+}
+
+function runLength(points: number[]) {
+  let length = 0;
+  for (let i = 2; i < points.length; i += 2)
+    length += Math.hypot(
+      points[i] - points[i - 2],
+      points[i + 1] - points[i - 1],
+    );
+  return length;
+}
+
+// LOGO_ROUTE as runs, and when the pulse covers each: the main line, then the branch down to the sub-node
+export const LOGO_RUNS = [
+  {
+    from: 0,
+    to: 1,
+    points: polyline(
+      [23, 48],
+      [28.5, 32],
+      [33, 17, 50, 17],
+      [113, 17],
+      [113, 48],
+      [107.5, 64],
+      [103, 79, 86, 79],
+      [23, 79],
+    ),
+  },
+  { from: 0.85, to: 0.92, points: [58, 79, 58, 90] },
+].map((run) => ({ ...run, length: runLength(run.points) }));
+
+// The point at distance d along a run and the unit normal there: x, y, nx, ny
+export function along(points: number[], d: number) {
+  let i = 2;
+  let len = Math.hypot(points[2] - points[0], points[3] - points[1]);
+  while (d > len && i < points.length - 2) {
+    d -= len;
+    i += 2;
+    len = Math.hypot(points[i] - points[i - 2], points[i + 1] - points[i - 1]);
+  }
+  const dx = (points[i] - points[i - 2]) / len;
+  const dy = (points[i + 1] - points[i - 1]) / len;
+  const u = Math.min(d, len);
+  return [points[i - 2] + dx * u, points[i - 1] + dy * u, -dy, dx];
+}
 
 function disc(c: CanvasRenderingContext2D, x: number, y: number, r: number) {
   c.beginPath();
@@ -45,7 +121,7 @@ const logo: Shape = {
   w: 143,
   h: 102,
   draw(c) {
-    c.translate(3, 3);
+    c.translate(PAD, PAD);
     c.fillStyle = INK;
     c.fill(new Path2D(LOGO_INK));
     c.fillStyle = ACCENT;
@@ -55,7 +131,7 @@ const logo: Shape = {
     c.lineWidth = 4;
     c.lineCap = c.lineJoin = "round";
     c.stroke(new Path2D(LOGO_ROUTE));
-    for (const [x, y] of LOGO_NODES) disc(c, x, y, 5.5);
+    for (const [x, y, r] of LOGO_NODES) disc(c, x, y, r);
   },
 };
 
@@ -194,11 +270,19 @@ function boxFor(stage: number, w: number, h: number): Box {
   return { x: w * 0.5, y: h * 0.16, w: w * 0.5 - 170, h: h * 0.68 };
 }
 
-// Sample n points (x, y, isAccent) out of a shape drawn to fit the box.
-function sample(shape: Shape, box: Box, n: number) {
+// Scale a shape to fit the box, centred in it
+function fit(shape: Shape, box: Box) {
   const scale = Math.min(box.w / shape.w, box.h / shape.h);
   const cw = Math.ceil(shape.w * scale);
   const ch = Math.ceil(shape.h * scale);
+  const left = box.x + (box.w - cw) / 2;
+  const top = box.y + (box.h - ch) / 2;
+  return { scale, cw, ch, left, top };
+}
+
+// Sample n points (x, y, isAccent) out of a shape drawn to fit the box.
+function sample(shape: Shape, box: Box, n: number) {
+  const { scale, cw, ch, left, top } = fit(shape, box);
   const off = document.createElement("canvas");
   off.width = cw;
   off.height = ch;
@@ -213,8 +297,6 @@ function sample(shape: Shape, box: Box, n: number) {
       const i = (y * cw + x) * 4;
       if (data[i + 3] > 128) hits.push(x, y, data[i + 1] > data[i] ? 1 : 0);
     }
-  const left = box.x + (box.w - cw) / 2;
-  const top = box.y + (box.h - ch) / 2;
   const out = new Float32Array(n * 3);
   const count = hits.length / 3;
   if (!count) hits.push(cw / 2, ch / 2, 1);
@@ -225,6 +307,73 @@ function sample(shape: Shape, box: Box, n: number) {
     out[i * 3 + 2] = hits[k + 2];
   }
   return out;
+}
+
+// The logo's dots: the hooks as sampled, then the nodes and the route drawn in the other hook's colour.
+// rest is where each dot sits, laid out like sample(); off is how the run moves it from there, per kind of dot.
+function logoDots(box: Box, n: number) {
+  const { scale, left, top } = fit(logo, box);
+  const nodeStart = Math.round(n * 0.67);
+  const routeStart = Math.round(n * 0.85);
+  const rest = new Float32Array(n * 3);
+  rest.set(sample(logo, box, nodeStart));
+  const offX = new Float32Array(n);
+  const offY = new Float32Array(n);
+  const owner = new Uint8Array(n); // the node a hook or node dot moves with
+  const at = new Float32Array(n); // when the pulse passes a route dot
+  const ink = new Path2D(LOGO_INK);
+  const probe = document.createElement("canvas").getContext("2d")!;
+  const put = (i: number, x: number, y: number) => {
+    rest[i * 3] = left + (x + PAD) * scale;
+    rest[i * 3 + 1] = top + (y + PAD) * scale;
+    rest[i * 3 + 2] = probe.isPointInPath(ink, x, y) ? 1 : 0;
+  };
+  // Hook dots: the nearest node pushes them out as it swells, 1.5x at its rim fading to nothing 4 units away
+  for (let i = 0; i < nodeStart; i++) {
+    const x = (rest[i * 3] - left) / scale - PAD;
+    const y = (rest[i * 3 + 1] - top) / scale - PAD;
+    let gap = Infinity;
+    LOGO_NODES.forEach(([nx, ny, r], k) => {
+      const d = Math.hypot(x - nx, y - ny);
+      if (d - r >= gap) return;
+      gap = d - r;
+      owner[i] = k;
+      const push = (Math.max(0, 1 - gap / 4) * r * 0.5 * scale) / d;
+      offX[i] = (x - nx) * push;
+      offY[i] = (y - ny) * push;
+    });
+  }
+  // Node dots: a ring and a core around each node, shared out by radius and spaced by the golden angle (2.4 rad)
+  const radii = LOGO_NODES.reduce((sum, [, , r]) => sum + r, 0);
+  let k = 0;
+  let filled = LOGO_NODES[0][2];
+  for (let i = nodeStart; i < routeStart; i++) {
+    const j = i - nodeStart;
+    while (((j + 0.5) / (routeStart - nodeStart)) * radii > filled)
+      filled += LOGO_NODES[++k][2];
+    const [nx, ny, r] = LOGO_NODES[k];
+    const radius = r * (j % 4 ? 0.6 + Math.random() * 0.1 : Math.random() / 4);
+    put(i, nx, ny);
+    owner[i] = k;
+    offX[i] = Math.cos(j * 2.4) * radius * scale;
+    offY[i] = Math.sin(j * 2.4) * radius * scale;
+  }
+  // Route dots: three lanes along the runs, spaced evenly by length
+  const total = LOGO_RUNS.reduce((sum, run) => sum + run.length, 0);
+  for (let i = routeStart; i < n; i++) {
+    let d = ((i - routeStart + 0.5) / (n - routeStart)) * total;
+    let r = 0;
+    while (d > LOGO_RUNS[r].length && r < LOGO_RUNS.length - 1)
+      d -= LOGO_RUNS[r++].length;
+    const { from, to, points, length } = LOGO_RUNS[r];
+    const [x, y, nx, ny] = along(points, d);
+    const lane = ((i % 3) - 1) * 0.34;
+    put(i, x, y);
+    offX[i] = nx * lane * scale;
+    offY[i] = ny * lane * scale;
+    at[i] = from + ((to - from) * d) / length;
+  }
+  return { rest, offX, offY, owner, at, nodeStart, routeStart };
 }
 
 // Scroll position to the chapter we are leaving and how far into the next one, holding still around each chapter's middle.
@@ -267,6 +416,12 @@ export function StoryParticles({
     let z = new Float32Array(0); // depth for mouse parallax, -1..1
     let delay = new Float32Array(0); // when a dot leaves its shape, 0..1
     let fly = new Float32Array(0); // burst direction and distance, x then y
+    let rig: ReturnType<typeof logoDots> | null = null;
+    let live = new Float32Array(0); // where the logo's dots head this frame, for both logo chapters
+    let glow = new Float32Array(0); // how much each logo dot lights up this frame, 0..1
+    const fire = new Float32Array(LOGO_NODES.length); // how swollen each node is, 0..1
+    const spinX = new Float32Array(LOGO_NODES.length); // each node's turn and swell, as cos and sin
+    const spinY = new Float32Array(LOGO_NODES.length);
     let mouse: { x: number; y: number } | null = null;
     const tilt = { x: 0, y: 0 };
     let frame = 0;
@@ -308,8 +463,12 @@ export function StoryParticles({
           fly[i * 2 + 1] = Math.sin(angle) * far;
         }
       }
+      rig = logoDots(boxFor(0, width, height), n);
+      live = rig.rest.slice();
+      glow = new Float32Array(n);
+      runLogo(CYCLE - 1); // a quiet moment, the pulse gone and no node swelling: what still mode shows
       targets = SHAPES.map((shape, i) =>
-        sample(shape, boxFor(i, width, height), n),
+        shape === logo ? live : sample(shape, boxFor(i, width, height), n),
       );
       if (still) {
         const home = targets[0];
@@ -317,6 +476,41 @@ export function StoryParticles({
           x[i] = home[i * 3];
           y[i] = home[i * 3 + 1];
         }
+      }
+    }
+
+    // Play the header logo's run on the logo's dots: move where they head and let the springs carry them there
+    function runLogo(now: number) {
+      if (!rig) return;
+      const { rest, offX, offY, owner, at, nodeStart, routeStart } = rig;
+      const time = now % CYCLE;
+      const pulse = time / CROSS; // how far along the route the pulse is; past 1 it has gone
+      for (let k = 0; k < LOGO_NODES.length; k++) {
+        const since = (time - LOGO_NODES[k][3] * CROSS + CYCLE) % CYCLE;
+        fire[k] = Math.max(0, 1 - since / SWELL);
+        const turn = now * SPIN * (k % 2 ? 1 : -1);
+        spinX[k] = Math.cos(turn) * (1 + 0.5 * fire[k]);
+        spinY[k] = Math.sin(turn) * (1 + 0.5 * fire[k]);
+      }
+      for (let i = 0; i < n; i++) {
+        const k = owner[i];
+        let dx = offX[i];
+        let dy = offY[i];
+        if (i < nodeStart) {
+          dx *= fire[k];
+          dy *= fire[k];
+        } else if (i < routeStart) {
+          dx = offX[i] * spinX[k] - offY[i] * spinY[k];
+          dy = offX[i] * spinY[k] + offY[i] * spinX[k];
+          glow[i] = fire[k];
+        } else {
+          // The lanes spread as the pulse passes
+          glow[i] = Math.max(0, 1 - Math.abs(at[i] - pulse) / PULSE);
+          dx *= 1 + 3 * glow[i];
+          dy *= 1 + 3 * glow[i];
+        }
+        live[i * 3] = rest[i * 3] + dx;
+        live[i * 3 + 1] = rest[i * 3 + 1] + dy;
       }
     }
 
@@ -338,8 +532,13 @@ export function StoryParticles({
       }
       const near = t < 0.5 ? from : from + 1;
       if (near !== current) onChapter((current = near));
+      const last = SHAPES.length - 1;
+      const to = Math.min(from + 1, last);
+      if (!still && (from === 0 || to === last)) runLogo(performance.now());
+      const logoFrom = from === 0 ? 1 : 0;
+      const logoTo = to === last ? 1 : 0;
       const a = targets[from];
-      const b = targets[Math.min(from + 1, SHAPES.length - 1)];
+      const b = targets[to];
       const span = Math.min(width, height);
       tilt.x += ((mouse ? mouse.x / width - 0.5 : 0) - tilt.x) * 0.05;
       tilt.y += ((mouse ? mouse.y / height - 0.5 : 0) - tilt.y) * 0.05;
@@ -382,8 +581,9 @@ export function StoryParticles({
             x[i] += vx[i];
             y[i] += vy[i];
           }
-          // In flight dots swell, brighten and leave a short trail
-          const lift = Math.sin(own * Math.PI);
+          // In flight dots swell, brighten and leave a short trail, as do the logo's nodes and route on its run
+          const lit = glow[i] * (logoFrom + (logoTo - logoFrom) * e);
+          const lift = Math.max(Math.sin(own * Math.PI), lit);
           const size = (1.4 + (z[i] + 1) * 0.45) * (1 + 1.8 * lift);
           const alpha = (pass ? 0.55 : 0.7) + (z[i] + 1) * 0.15;
           ctx!.globalAlpha = alpha + (1 - alpha) * lift;
