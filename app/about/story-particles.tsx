@@ -10,6 +10,7 @@ import {
   LOGO_NODES,
   LOGO_ROUTE,
 } from "../logo";
+import { runCanvas, type Frame } from "../particles";
 
 const INK = "#f00"; // marker colours when sampling a shape; drawn as --text and --accent
 const ACCENT = "#0f0";
@@ -384,11 +385,8 @@ export function StoryParticles() {
 
   useEffect(() => {
     const canvas = ref.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
+    if (!canvas) return;
     const steps = [...document.querySelectorAll<HTMLElement>("[data-chapter]")];
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let still = motion.matches;
 
     let width = 0;
     let height = 0;
@@ -407,24 +405,17 @@ export function StoryParticles() {
     const fire = new Float32Array(LOGO_NODES.length); // how swollen each node is, 0..1
     const spinX = new Float32Array(LOGO_NODES.length); // each node's turn and swell, as cos and sin
     const spinY = new Float32Array(LOGO_NODES.length);
-    let mouse: { x: number; y: number } | null = null;
     const tilt = { x: 0, y: 0 };
-    let frame = 0;
-    let onScreen = true;
-    let colours = ["", ""]; // ink, accent; read again when the theme changes
-    function readColours() {
-      const style = getComputedStyle(canvas!);
-      colours = [style.borderTopColor, style.color];
+
+    // Resampling reshuffles the dots, so skip the small height changes of a phone's URL bar
+    function layout(w: number, h: number) {
+      if (n && w === width && Math.abs(h - height) < 120) return;
+      width = w;
+      height = h;
+      resample();
     }
 
-    function layout() {
-      width = canvas!.clientWidth;
-      height = canvas!.clientHeight;
-      if (!width) return;
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
-      canvas!.width = width * ratio;
-      canvas!.height = height * ratio;
-      ctx!.setTransform(ratio, 0, 0, ratio, 0, 0);
+    function resample() {
       const next = width < 700 ? 2600 : width < NARROW ? 4200 : 6400;
       if (next !== n) {
         // New cloud: every dot starts somewhere random and flies home, which is the intro
@@ -450,17 +441,9 @@ export function StoryParticles() {
       rig = logoDots(boxFor(0, width, height), n);
       live = rig.rest.slice();
       glow = new Float32Array(n);
-      runLogo(LOGO_CYCLE - 1); // a quiet moment, the pulse gone and no node swelling: what still mode shows
       targets = SHAPES.map((shape, i) =>
         shape === logo ? live : sample(shape, boxFor(i, width, height), n),
       );
-      if (still) {
-        const home = targets[0];
-        for (let i = 0; i < n; i++) {
-          x[i] = home[i * 3];
-          y[i] = home[i * 3 + 1];
-        }
-      }
     }
 
     // Play the header logo's run on the logo's dots: move where they head and let the springs carry them there
@@ -507,8 +490,9 @@ export function StoryParticles() {
       return chapter(centres, window.innerHeight / 2);
     }
 
-    function draw() {
-      if (!n || !targets.length) return;
+    function draw(ctx: CanvasRenderingContext2D, frame: Frame) {
+      if (!n) return;
+      const { still, mouse } = frame;
       let { from, t } = progress();
       if (still) {
         // No flight: show whichever chapter is nearer
@@ -517,7 +501,9 @@ export function StoryParticles() {
       }
       const last = SHAPES.length - 1;
       const to = Math.min(from + 1, last);
-      if (!still && (from === 0 || to === last)) runLogo(performance.now());
+      // Still mode shows a quiet moment of the run, the pulse gone and no node swelling
+      if (from === 0 || to === last)
+        runLogo(still ? LOGO_CYCLE - 1 : frame.now);
       const logoFrom = from === 0 ? 1 : 0;
       const logoTo = to === last ? 1 : 0;
       const a = targets[from];
@@ -525,10 +511,9 @@ export function StoryParticles() {
       const span = Math.min(width, height);
       tilt.x += ((mouse ? mouse.x / width - 0.5 : 0) - tilt.x) * 0.05;
       tilt.y += ((mouse ? mouse.y / height - 0.5 : 0) - tilt.y) * 0.05;
-      ctx!.clearRect(0, 0, width, height);
 
       for (let pass = 0; pass < 2; pass++) {
-        ctx!.fillStyle = colours[pass];
+        ctx.fillStyle = pass ? frame.accent : frame.ink;
         for (let i = 0; i < n; i++) {
           // Each dot leaves on its own beat, flies out, and lands in the next shape
           const own = Math.min(1, Math.max(0, (t - delay[i] * 0.4) / 0.6));
@@ -569,11 +554,11 @@ export function StoryParticles() {
           const lift = Math.max(Math.sin(own * Math.PI), lit);
           const size = (1.4 + (z[i] + 1) * 0.45) * (1 + 1.8 * lift);
           const alpha = (pass ? 0.55 : 0.7) + (z[i] + 1) * 0.15;
-          ctx!.globalAlpha = alpha + (1 - alpha) * lift;
-          ctx!.fillRect(x[i] - size / 2, y[i] - size / 2, size, size);
+          ctx.globalAlpha = alpha + (1 - alpha) * lift;
+          ctx.fillRect(x[i] - size / 2, y[i] - size / 2, size, size);
           if (lift > 0.1 && !still) {
-            ctx!.globalAlpha *= 0.4;
-            ctx!.fillRect(
+            ctx.globalAlpha *= 0.4;
+            ctx.fillRect(
               x[i] - vx[i] * 2.5 - size / 4,
               y[i] - vy[i] * 2.5 - size / 4,
               size / 2,
@@ -582,39 +567,9 @@ export function StoryParticles() {
           }
         }
       }
-      ctx!.globalAlpha = 1;
+      ctx.globalAlpha = 1;
     }
 
-    function loop() {
-      draw();
-      frame = requestAnimationFrame(loop);
-    }
-
-    function update() {
-      const run = !still && onScreen && !document.hidden && width > 0;
-      if (run && !frame) frame = requestAnimationFrame(loop);
-      if (!run && frame) {
-        cancelAnimationFrame(frame);
-        frame = 0;
-      }
-      if (still) draw();
-    }
-
-    // Reduced motion can change while the page is open: stop or start the loop, and rest the logo for still mode
-    function onMotion() {
-      still = motion.matches;
-      if (still) runLogo(LOGO_CYCLE - 1);
-      update();
-    }
-
-    function onMove(event: PointerEvent) {
-      if (event.pointerType !== "mouse") return;
-      const box = canvas!.getBoundingClientRect();
-      mouse = { x: event.clientX - box.left, y: event.clientY - box.top };
-    }
-    function onLeave() {
-      mouse = null;
-    }
     // Click or tap anywhere that is not a control: a shockwave throws nearby dots outwards
     let down: { x: number; y: number } | null = null;
     function onDown(event: PointerEvent) {
@@ -624,6 +579,9 @@ export function StoryParticles() {
       const tap =
         down && Math.hypot(event.clientX - down.x, event.clientY - down.y) < 10;
       down = null;
+      const still = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
       if (!tap || still || (event.target as Element).closest("a, button"))
         return;
       const box = canvas!.getBoundingClientRect();
@@ -640,72 +598,26 @@ export function StoryParticles() {
         }
       }
     }
-    // Still mode has no loop: repaint when scrolling picks another chapter
-    function onScroll() {
-      if (still) draw();
-    }
 
-    // Resampling reshuffles the dots, so skip the small height changes of a phone's URL bar and settle first
-    let resizing = 0;
+    const handle = runCanvas(canvas, { layout, draw });
+    if (!handle) return;
     let cancelled = false;
-    const resizer = new ResizeObserver(() => {
-      const sameWidth = canvas.clientWidth === width;
-      if (sameWidth && Math.abs(canvas.clientHeight - height) < 120) return;
-      clearTimeout(resizing);
-      resizing = window.setTimeout(
-        () => {
-          layout();
-          update();
-        },
-        width ? 150 : 0,
-      );
-    });
-    const watcher = new IntersectionObserver(([entry]) => {
-      onScreen = entry.isIntersecting;
-      update();
-    });
-    const recolour = () => {
-      readColours();
-      update();
-    };
-    const theme = new MutationObserver(recolour);
-    const scheme = window.matchMedia("(prefers-color-scheme: dark)");
-    resizer.observe(canvas);
-    watcher.observe(canvas);
-    theme.observe(document.documentElement, {
-      attributeFilter: ["data-theme"],
-    });
-    scheme.addEventListener("change", recolour);
-    motion.addEventListener("change", onMotion);
-    document.addEventListener("visibilitychange", update);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("pointermove", onMove);
+    // Still mode has no loop: repaint when scrolling picks another chapter
+    window.addEventListener("scroll", handle.paint, { passive: true });
     window.addEventListener("pointerdown", onDown);
     window.addEventListener("pointerup", onUp);
-    document.documentElement.addEventListener("pointerleave", onLeave);
     // The braces are type: sample again once the display face has loaded
-    readColours();
     document.fonts.ready.then(() => {
-      if (cancelled) return;
-      layout();
-      update();
+      if (cancelled || !width) return;
+      resample();
+      handle.paint();
     });
     return () => {
       cancelled = true;
-      clearTimeout(resizing);
-      resizer.disconnect();
-      watcher.disconnect();
-      theme.disconnect();
-      scheme.removeEventListener("change", recolour);
-      motion.removeEventListener("change", onMotion);
-      document.removeEventListener("visibilitychange", update);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("pointermove", onMove);
+      handle.stop();
+      window.removeEventListener("scroll", handle.paint);
       window.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointerup", onUp);
-      document.documentElement.removeEventListener("pointerleave", onLeave);
-      cancelAnimationFrame(frame);
-      frame = 0;
     };
   }, []);
 
