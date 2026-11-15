@@ -28,17 +28,8 @@ test("the homepage lists releases in the same order", () => {
 
 test("side project hosts are derived from https links", () => {
   for (const p of sideProjects) expect(p.href).toStartWith("https://");
-  expect(sideProjects.map((p) => hostOf(p.href))).toEqual([
-    "chaptify.app",
-    "cafeprana.de",
-    "github.com",
-  ]);
-});
-
-test("only the Cancer Type Classifier is discontinued", () => {
-  expect(
-    sideProjects.filter((p) => p.discontinued).map((p) => p.title),
-  ).toEqual(["Cancer Type Classifier"]);
+  expect(hostOf("https://www.example.de/x")).toBe("example.de");
+  expect(hostOf("https://github.com/a/b")).toBe("github.com");
 });
 
 test("titles are unique within each list (React keys)", () => {

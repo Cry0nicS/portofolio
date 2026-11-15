@@ -18,6 +18,7 @@ import { TowerParticles } from "./tower-particles";
 import { ArenaParticles } from "./arena-particles";
 import "./home.css";
 
+// Not pageMetadata("/"): that would title the homepage "home" and change its head
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 const marks = { add: "+", change: "~", remove: "−", next: "›" };
@@ -231,7 +232,7 @@ export default function Home() {
             <ol className="cl-log">
               {esportsTimeline.map(({ years, title, detail }) => (
                 <li key={title}>
-                  <span className="cl-log-years">{years ?? ""}</span>
+                  <span className="cl-log-years">{years}</span>
                   <span>
                     <strong>{title}</strong>
                     {detail && <span className="muted"> · {detail}</span>}

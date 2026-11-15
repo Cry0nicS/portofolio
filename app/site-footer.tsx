@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Fragment } from "react";
-import { site } from "./site";
+import { legalPages, site } from "./site";
 
 const contact = [
   [
@@ -11,8 +11,6 @@ const contact = [
   ["GitHub", "https://github.com/Cry0nicS", "Cry0nicS"],
   ["Email", `mailto:${site.email}`, site.email],
 ];
-
-const legal = site.pages.filter((p) => "legal" in p);
 
 export function SiteFooter() {
   return (
@@ -34,7 +32,7 @@ export function SiteFooter() {
       <div className="colophon mono">
         <p>Built in Berlin, 2026. GG.</p>
         <p>
-          {legal.map(({ path, label }, i) => (
+          {legalPages.map(({ path, label }, i) => (
             <Fragment key={path}>
               {i > 0 && " · "}
               <Link href={path}>{label}</Link>
