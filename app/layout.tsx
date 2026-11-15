@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, IBM_Plex_Mono } from "next/font/google";
 import Link from "next/link";
 import { Konami, ThemeToggle } from "./controls";
 import { PenTrail, PenTrailToggle } from "./pen-trail";
+import { site } from "./site";
 import { SiteNav } from "./site-nav";
 import {
   LOGO_ACCENT,
@@ -31,7 +32,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://adrianpopescu.dev"),
+  metadataBase: new URL(site.origin),
   title: {
     default: "Adrian Popescu · Builder first.",
     template: "%s · Adrian Popescu",
@@ -50,7 +51,7 @@ const contact = [
     "in/adrian-popescu",
   ],
   ["GitHub", "https://github.com/Cry0nicS", "Cry0nicS"],
-  ["Email", "mailto:contact@adrianpopescu.dev", "contact@adrianpopescu.dev"],
+  ["Email", `mailto:${site.email}`, site.email],
 ];
 
 function Logo() {

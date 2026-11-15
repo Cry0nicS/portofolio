@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { og } from "../site";
+import { og, site } from "../site";
 
 export const metadata: Metadata = {
   title: "Impressum",
@@ -26,8 +26,7 @@ export default function Impressum() {
 
       <h2>Kontakt</h2>
       <p>
-        E-Mail:{" "}
-        <a href="mailto:contact@adrianpopescu.dev">contact@adrianpopescu.dev</a>
+        E-Mail: <a href={`mailto:${site.email}`}>{site.email}</a>
       </p>
 
       <h2>Verantwortlich für den Inhalt gemäß § 18 Abs. 2 MStV</h2>
