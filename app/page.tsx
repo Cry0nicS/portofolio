@@ -11,6 +11,7 @@ import {
   experience,
   releases,
   type ReleaseId,
+  hostOf,
 } from "./content";
 import { ReleaseIndex } from "./release-index";
 import { TowerParticles } from "./tower-particles";
@@ -138,7 +139,7 @@ export default function Home() {
             </Group>
 
             <Group title="Shipped" kind="add">
-              {projects.map(([stat, title, text]) => (
+              {projects.map(({ stat, title, text }) => (
                 <li key={title}>
                   <strong>{title}</strong>
                   <span className="cl-stat">{stat}</span>
@@ -216,7 +217,7 @@ export default function Home() {
           <section className="cl-group">
             <h3>Highlights</h3>
             <dl className="cl-stats">
-              {esportsStats.map(([stat, label]) => (
+              {esportsStats.map(({ stat, label }) => (
                 <div key={stat}>
                   <dt>{stat}</dt>
                   <dd>{label}</dd>
@@ -228,12 +229,13 @@ export default function Home() {
           <section className="cl-group">
             <h3>Log</h3>
             <ol className="cl-log">
-              {esportsTimeline.map(([years, title, detail]) => (
+              {esportsTimeline.map(({ years, title, detail }) => (
                 <li key={title}>
-                  <span className="cl-log-years">{years}</span>
+                  <span className="cl-log-years">{years ?? ""}</span>
                   <span>
                     <strong>{title}</strong>
-                    {detail && <span className="muted"> · {detail}</span>}
+                    {/* "" keeps the flight payload as it was; undefined differs */}
+                    {detail ? <span className="muted"> · {detail}</span> : ""}
                   </span>
                 </li>
               ))}
@@ -244,16 +246,15 @@ export default function Home() {
         <Release id="after-hours">
           <h2>Things I build after hours.</h2>
           <ul className="cl-plugins">
-            {sideProjects.map(([title, text, tag, href, host]) => (
+            {sideProjects.map(({ title, text, kind, href, discontinued }) => (
               <li key={title}>
-                <a
-                  href={href}
-                  data-mark={tag.includes("discontinued") ? "−" : "+"}
-                >
+                <a href={href} data-mark={discontinued ? "−" : "+"}>
                   <span className="cl-plugin-head">
                     <strong>{title}</strong>
-                    <span className="cl-plugin-tag">{tag}</span>
-                    <span className="cl-plugin-host">{host} ↗</span>
+                    <span className="cl-plugin-tag">
+                      {kind + (discontinued ? " · discontinued" : "")}
+                    </span>
+                    <span className="cl-plugin-host">{hostOf(href)} ↗</span>
                   </span>
                   <span className="cl-plugin-text">{text}</span>
                 </a>
@@ -273,7 +274,7 @@ export default function Home() {
               </tr>
             </thead>
             <tbody>
-              {experience.map(([years, company, role]) => (
+              {experience.map(({ years, company, role }) => (
                 <tr key={years + role}>
                   <td>{years}</td>
                   <th scope="row">{company}</th>
