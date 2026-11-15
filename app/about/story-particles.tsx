@@ -377,6 +377,15 @@ export function chapter(centres: number[], viewportMiddle: number) {
   return { from, t: Math.min(1, Math.max(0, (raw - 0.25) / 0.5)) };
 }
 
+// chapter() for the page's [data-chapter] elements at the middle of the viewport
+export function chapterOf(steps: HTMLElement[]) {
+  const centres = steps.map((el) => {
+    const r = el.getBoundingClientRect();
+    return r.top + r.height / 2;
+  });
+  return chapter(centres, window.innerHeight / 2);
+}
+
 const ease = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
 
@@ -482,18 +491,12 @@ export function StoryParticles() {
       }
     }
 
-    function progress() {
-      const centres = steps.map((el) => {
-        const r = el.getBoundingClientRect();
-        return r.top + r.height / 2;
-      });
-      return chapter(centres, window.innerHeight / 2);
-    }
-
+    let still = false; // the latest frame's reduced-motion state, for taps
     function draw(ctx: CanvasRenderingContext2D, frame: Frame) {
       if (!n) return;
-      const { still, mouse } = frame;
-      let { from, t } = progress();
+      const { mouse } = frame;
+      still = frame.still;
+      let { from, t } = chapterOf(steps);
       if (still) {
         // No flight: show whichever chapter is nearer
         from = t < 0.5 ? from : from + 1;
@@ -579,9 +582,6 @@ export function StoryParticles() {
       const tap =
         down && Math.hypot(event.clientX - down.x, event.clientY - down.y) < 10;
       down = null;
-      const still = window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      ).matches;
       if (!tap || still || (event.target as Element).closest("a, button"))
         return;
       const box = canvas!.getBoundingClientRect();

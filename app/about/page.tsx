@@ -1,7 +1,7 @@
 // The about page: one cloud of dots turns into each chapter, from the first game to AI agents.
 import type { Metadata } from "next";
-import { og, site } from "../site";
 import Link from "next/link";
+import { og, site } from "../site";
 import { Story } from "./story";
 import "./about.css";
 

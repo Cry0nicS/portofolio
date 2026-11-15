@@ -2,7 +2,7 @@
 
 // The chapter rail and the sticky particle stage; the chapters themselves scroll past in the page.
 import { useEffect, useState, type CSSProperties } from "react";
-import { chapter, StoryParticles } from "./story-particles";
+import { chapterOf, StoryParticles } from "./story-particles";
 import { smoothScrollClick } from "../smooth-scroll";
 
 // Section ids in page order, also the rail labels
@@ -15,11 +15,7 @@ export function Story() {
   useEffect(() => {
     const steps = [...document.querySelectorAll<HTMLElement>("[data-chapter]")];
     function track() {
-      const centres = steps.map((el) => {
-        const r = el.getBoundingClientRect();
-        return r.top + r.height / 2;
-      });
-      const { from, t } = chapter(centres, window.innerHeight / 2);
+      const { from, t } = chapterOf(steps);
       setActive(t < 0.5 ? from : from + 1);
     }
     track();

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { og, site } from "../site";
 import Link from "next/link";
+import { og, site } from "../site";
 
 export const metadata: Metadata = {
   title: "Datenschutz",
