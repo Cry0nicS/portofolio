@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { og } from "../site";
 import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Datenschutz",
   alternates: { canonical: "/datenschutz" },
-  openGraph: { url: "/datenschutz", title: "Datenschutz" },
+  openGraph: { ...og, url: "/datenschutz", title: "Datenschutz" },
   robots: { index: false },
 };
 
