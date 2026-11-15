@@ -26,30 +26,33 @@
   z-index: 2;
   height: 0;
 }
-.ab-rail ol {
-  position: absolute;
-  right: clamp(1rem, 2.5vw, 2rem);
-  translate: 0 -50%;
-}
-/* The line fills as the story advances */
-.ab-rail ol::after {
-  content: "";
-  position: absolute;
-  right: 4px;
-  top: 1.35rem;
-  bottom: 1.35rem;
-  border-right: 1px solid var(--accent);
-  transform-origin: top;
-  scale: 1 var(--at);
-  transition: scale 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.ab-rail a {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  min-height: 44px;
-  padding-right: 1.4rem;
-  color: var(--muted);
+/* Desktop only: below this the dock (globals.css) lays the rail out */
+@media (min-width: 901px) {
+  .ab-rail ol {
+    position: absolute;
+    right: clamp(1rem, 2.5vw, 2rem);
+    translate: 0 -50%;
+  }
+  /* The line fills as the story advances */
+  .ab-rail ol::after {
+    content: "";
+    position: absolute;
+    right: 4px;
+    top: var(--rail-inset, 1.35rem);
+    bottom: var(--rail-inset, 1.35rem);
+    border-right: 1px solid var(--accent);
+    transform-origin: top;
+    scale: 1 var(--at);
+    transition: scale 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .ab-rail a {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-height: 44px;
+    padding-right: 1.4rem;
+    color: var(--muted);
+  }
 }
 
 /* Chapters */
@@ -97,11 +100,6 @@
   letter-spacing: -0.04em;
   max-width: 12ch;
 }
-.ab-lead {
-  font-size: clamp(1.1rem, 1.8vw, 1.25rem);
-  line-height: 1.55;
-  color: var(--muted);
-}
 .ab-facts {
   display: grid;
   gap: 0.5rem;
@@ -122,32 +120,6 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   padding-top: 0.75rem;
-}
-.ab-btn {
-  display: inline-flex;
-  align-items: center;
-  min-height: 46px;
-  padding: 0.5rem 1.15rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
-  font-family: var(--mono);
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition:
-    border-color 0.2s,
-    background-color 0.2s;
-}
-.ab-btn:hover {
-  border-color: var(--accent);
-  color: inherit;
-}
-.ab-btn-primary,
-.ab-btn-primary:hover {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--on-accent);
 }
 
 /* Phones: the shape sits in the top of the screen, the words under it on a veil of paper */

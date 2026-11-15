@@ -9,12 +9,16 @@ import {
   projects,
   sideProjects,
   experience,
+  releases,
+  type ReleaseId,
+  hostOf,
 } from "./content";
 import { ReleaseIndex } from "./release-index";
 import { TowerParticles } from "./tower-particles";
 import { ArenaParticles } from "./arena-particles";
 import "./home.css";
 
+// Not pageMetadata("/"): that would title the homepage "home" and change its head
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 const marks = { add: "+", change: "~", remove: "−", next: "›" };
@@ -45,28 +49,22 @@ function Item({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function ReleaseHead({
-  version,
-  name,
-  years,
-  latest,
-}: {
-  version: string;
-  name: string;
-  years: string;
-  latest?: boolean;
-}) {
+function Release({ id, children }: { id: ReleaseId; children: ReactNode }) {
+  const r = releases.find((r) => r.id === id)!;
   return (
-    <header className="cl-head">
-      <p className="cl-ver">
-        <span className="cl-num">{version}</span>
-        <span className="cl-name">{name}</span>
-      </p>
-      <p className="cl-date">
-        {latest && <span className="cl-badge">latest</span>}
-        {years}
-      </p>
-    </header>
+    <article className="cl-release" id={id}>
+      <header className="cl-head">
+        <p className="cl-ver">
+          <span className="cl-num">{r.version}</span>
+          <span className="cl-name">{r.name}</span>
+        </p>
+        <p className="cl-date">
+          {r === releases[0] && <span className="cl-badge">latest</span>}
+          {r.years}
+        </p>
+      </header>
+      {children}
+    </article>
   );
 }
 
@@ -76,7 +74,7 @@ export default function Home() {
       <aside className="cl-side" aria-label="Release index">
         <p className="cl-side-title">
           Changelog
-          <span className="cl-badge">v3.0 current</span>
+          <span className="cl-badge">{releases[0].version} current</span>
         </p>
         <ReleaseIndex />
         <TowerParticles />
@@ -89,15 +87,9 @@ export default function Home() {
       </aside>
 
       <div className="cl-main">
-        <article className="cl-release" id="v3">
-          <ReleaseHead
-            version="v3.0"
-            name="ai-first"
-            years="2022 – now"
-            latest
-          />
+        <Release id="v3">
           <h1>Builder first.</h1>
-          <p className="cl-lead">
+          <p className="lead">
             Technical Product Owner at mkk meine-krankenkasse, leading the
             public website and applied AI adoption in the digital department.
             Previously nearly a decade in esports, as an engineer at GosuGamers
@@ -111,10 +103,10 @@ export default function Home() {
             </p>
           </blockquote>
           <p className="cl-cta">
-            <a className="cl-btn cl-btn-primary" href="#work">
+            <a className="btn btn-primary" href="#work">
               See the work
             </a>
-            <a className="cl-btn" href="#esports">
+            <a className="btn" href="#esports">
               The esports years
             </a>
           </p>
@@ -148,7 +140,7 @@ export default function Home() {
             </Group>
 
             <Group title="Shipped" kind="add">
-              {projects.map(([stat, title, text]) => (
+              {projects.map(({ stat, title, text }) => (
                 <li key={title}>
                   <strong>{title}</strong>
                   <span className="cl-stat">{stat}</span>
@@ -173,10 +165,9 @@ export default function Home() {
               <Item title="Workshops and hackathons">Next up.</Item>
             </Group>
           </section>
-        </article>
+        </Release>
 
-        <article className="cl-release" id="berlin">
-          <ReleaseHead version="v2.0" name="berlin" years="2020 – 2022" />
+        <Release id="berlin">
           <h2>Then the arenas went quiet.</h2>
           <p>
             Same habits, different stakes: millions of insured people,
@@ -206,12 +197,11 @@ export default function Home() {
               insurer.
             </Item>
           </Group>
-        </article>
+        </Release>
 
         <ArenaParticles />
 
-        <article className="cl-release" id="esports">
-          <ReleaseHead version="v1.0" name="esports" years="2012 – 2022" />
+        <Release id="esports">
           <h2>Ten years in the server room of esports.</h2>
           <p>
             I started as a volunteer in 2012, helping turn a weekend Dota 2
@@ -228,7 +218,7 @@ export default function Home() {
           <section className="cl-group">
             <h3>Highlights</h3>
             <dl className="cl-stats">
-              {esportsStats.map(([stat, label]) => (
+              {esportsStats.map(({ stat, label }) => (
                 <div key={stat}>
                   <dt>{stat}</dt>
                   <dd>{label}</dd>
@@ -240,7 +230,7 @@ export default function Home() {
           <section className="cl-group">
             <h3>Log</h3>
             <ol className="cl-log">
-              {esportsTimeline.map(([years, title, detail]) => (
+              {esportsTimeline.map(({ years, title, detail }) => (
                 <li key={title}>
                   <span className="cl-log-years">{years}</span>
                   <span>
@@ -251,36 +241,29 @@ export default function Home() {
               ))}
             </ol>
           </section>
-        </article>
+        </Release>
 
-        <article className="cl-release" id="after-hours">
-          <ReleaseHead version="ext" name="side quests" years="after hours" />
+        <Release id="after-hours">
           <h2>Things I build after hours.</h2>
           <ul className="cl-plugins">
-            {sideProjects.map(([title, text, tag, href, host]) => (
+            {sideProjects.map(({ title, text, kind, href, discontinued }) => (
               <li key={title}>
-                <a
-                  href={href}
-                  data-mark={tag.includes("discontinued") ? "−" : "+"}
-                >
+                <a href={href} data-mark={discontinued ? "−" : "+"}>
                   <span className="cl-plugin-head">
                     <strong>{title}</strong>
-                    <span className="cl-plugin-tag">{tag}</span>
-                    <span className="cl-plugin-host">{host} ↗</span>
+                    <span className="cl-plugin-tag">
+                      {kind + (discontinued ? " · discontinued" : "")}
+                    </span>
+                    <span className="cl-plugin-host">{hostOf(href)} ↗</span>
                   </span>
                   <span className="cl-plugin-text">{text}</span>
                 </a>
               </li>
             ))}
           </ul>
-        </article>
+        </Release>
 
-        <article className="cl-release" id="experience">
-          <ReleaseHead
-            version="log"
-            name="version history"
-            years="2013 – now"
-          />
+        <Release id="experience">
           <h2>Experience</h2>
           <table className="cl-table">
             <thead>
@@ -291,7 +274,7 @@ export default function Home() {
               </tr>
             </thead>
             <tbody>
-              {experience.map(([years, company, role]) => (
+              {experience.map(({ years, company, role }) => (
                 <tr key={years + role}>
                   <td>{years}</td>
                   <th scope="row">{company}</th>
@@ -304,7 +287,7 @@ export default function Home() {
             BSc Computer Science, Technical University of Cluj-Napoca · thesis
             on multi-agent systems for traffic routing. Certification: CSPO.
           </p>
-        </article>
+        </Release>
       </div>
     </div>
   );

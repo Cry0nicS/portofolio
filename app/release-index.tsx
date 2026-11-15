@@ -1,20 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { releases } from "./content";
 import { smoothScrollClick } from "./smooth-scroll";
 
-// href, version tag, name, years, short name for the bottom bar on small screens
+// Contact is the footer, not a Release: it stays the fixed last entry.
 const index = [
-  ["#v3", "v3.0", "ai-first", "2022 – now", "ai"],
-  ["#berlin", "v2.0", "berlin", "2020 – 2022", "berlin"],
-  ["#esports", "v1.0", "esports", "2012 – 2022", "esports"],
-  ["#after-hours", "ext", "side quests", "after hours", "quests"],
-  ["#experience", "log", "version history", "2013 – now", "history"],
-  ["#contact", "msg", "contact", "get in touch", "contact"],
+  ...releases.map((r) => ({ ...r, href: `#${r.id}` })),
+  {
+    href: "#contact",
+    version: "msg",
+    name: "contact",
+    years: "get in touch",
+    short: "contact",
+  },
 ];
 
 export function ReleaseIndex() {
-  const [current, setCurrent] = useState(index[0][0]);
+  const [current, setCurrent] = useState<string>(index[0].href);
 
   // Mark the release being read: the one crossing a line 40% down the viewport.
   useEffect(() => {
@@ -22,7 +25,7 @@ export function ReleaseIndex() {
     const atEnd = () =>
       window.innerHeight + window.scrollY >=
       document.documentElement.scrollHeight - 2;
-    const last = index[index.length - 1][0];
+    const last = index[index.length - 1].href;
     const observer = new IntersectionObserver(
       (entries) => {
         const hit = entries.find((entry) => entry.isIntersecting);
@@ -30,7 +33,7 @@ export function ReleaseIndex() {
       },
       { rootMargin: "-40% 0px -60% 0px" },
     );
-    for (const [href] of index) {
+    for (const { href } of index) {
       const section = document.querySelector(href);
       if (section) observer.observe(section);
     }
@@ -47,7 +50,7 @@ export function ReleaseIndex() {
   return (
     <nav className="dock" aria-label="Releases" onClick={smoothScrollClick}>
       <ol className="cl-index rail">
-        {index.map(([href, version, name, years, short]) => (
+        {index.map(({ href, version, name, years, short }) => (
           <li key={href}>
             <a href={href} aria-current={current === href ? "step" : undefined}>
               <span className="cl-index-ver">{version}</span>

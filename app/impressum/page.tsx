@@ -1,11 +1,6 @@
-import type { Metadata } from "next";
+import { pageMetadata, site } from "../site";
 
-export const metadata: Metadata = {
-  title: "Impressum",
-  alternates: { canonical: "/impressum" },
-  openGraph: { url: "/impressum", title: "Impressum" },
-  robots: { index: false },
-};
+export const metadata = pageMetadata("/impressum");
 
 export default function Impressum() {
   return (
@@ -25,8 +20,7 @@ export default function Impressum() {
 
       <h2>Kontakt</h2>
       <p>
-        E-Mail:{" "}
-        <a href="mailto:contact@adrianpopescu.dev">contact@adrianpopescu.dev</a>
+        E-Mail: <a href={`mailto:${site.email}`}>{site.email}</a>
       </p>
 
       <h2>Verantwortlich für den Inhalt gemäß § 18 Abs. 2 MStV</h2>
