@@ -87,7 +87,7 @@ export default function Home() {
       <div className="cl-main">
         <Release id="v3">
           <h1>Builder first.</h1>
-          <p className="cl-lead">
+          <p className="lead">
             Technical Product Owner at mkk meine-krankenkasse, leading the
             public website and applied AI adoption in the digital department.
             Previously nearly a decade in esports, as an engineer at GosuGamers
@@ -101,10 +101,10 @@ export default function Home() {
             </p>
           </blockquote>
           <p className="cl-cta">
-            <a className="cl-btn cl-btn-primary" href="#work">
+            <a className="btn btn-primary" href="#work">
               See the work
             </a>
-            <a className="cl-btn" href="#esports">
+            <a className="btn" href="#esports">
               The esports years
             </a>
           </p>

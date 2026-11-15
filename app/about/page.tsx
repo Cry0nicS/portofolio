@@ -19,7 +19,7 @@ export default function About() {
       <section className="ab-step ab-step-wide" id="start" data-chapter>
         <div className="wrap">
           <h1>It started with a game.</h1>
-          <p className="ab-lead">
+          <p className="lead muted">
             The long way from playing games to building with AI, told by one
             cloud of dots. Scroll to play it back; click to scatter it.
           </p>
@@ -108,16 +108,16 @@ export default function About() {
       <section className="ab-step ab-step-wide" id="handoff" data-chapter>
         <div className="wrap">
           <h2>Build it. Ship it. Hand it over.</h2>
-          <p className="ab-lead">
+          <p className="lead muted">
             That is the logo, too: a trigger, a handoff, an agent and an output,
             in one run. Systems people can run without me.
           </p>
           <p className="ab-cta">
-            <Link className="ab-btn ab-btn-primary" href="/#work">
+            <Link className="btn btn-primary" href="/#work">
               See the work
             </Link>
             {/* The contact footer is already on screen under this button, so the button writes instead of jumping */}
-            <a className="ab-btn" href={`mailto:${site.email}`}>
+            <a className="btn" href={`mailto:${site.email}`}>
               Get in touch
             </a>
           </p>
