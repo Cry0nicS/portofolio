@@ -2,14 +2,16 @@
 
 // One cloud of dots that becomes each chapter of the story as the page scrolls, bursting apart between shapes.
 import { useEffect, useRef } from "react";
+import { LOGO_ACCENT, LOGO_INK, LOGO_NODES, LOGO_ROUTE } from "../logo";
+import { runCanvas, type Frame } from "../particles";
+import { CHAPTERS, chapterOf, type ShapeName } from "./chapters";
 import {
-  LOGO_ACCENT,
-  LOGO_CROSS,
-  LOGO_CYCLE,
-  LOGO_INK,
-  LOGO_NODES,
-  LOGO_ROUTE,
-} from "../logo";
+  LOGO_RUNS,
+  LOGO_STILL,
+  along,
+  logoRig,
+  type LogoDots,
+} from "./logo-rig";
 
 const INK = "#f00"; // marker colours when sampling a shape; drawn as --text and --accent
 const ACCENT = "#0f0";
@@ -27,77 +29,6 @@ type Shape = {
 };
 
 const PAD = 3; // the logo is drawn this far in from the shape's edge
-
-// The header logo's run (globals.css): the pulse crosses the route in 1.9s of every 2.4s, and each node swells 1.5x as it passes
-const SWELL = 0.14 * LOGO_CYCLE; // how long a node takes to shrink back
-const PULSE = 0.03; // half the pulse's length, a dash of 6 on a route of pathLength 100
-const SPIN = (Math.PI * 2) / (LOGO_CYCLE * 4); // node dots turn once every four runs
-
-// Points along a run, x then y; a 4-number segment is a quadratic curve (control point, end), flattened into short lines
-function polyline(...segments: number[][]) {
-  const out = segments[0].slice();
-  for (const s of segments.slice(1)) {
-    if (s.length === 2) {
-      out.push(...s);
-      continue;
-    }
-    const x0 = out[out.length - 2];
-    const y0 = out[out.length - 1];
-    for (let k = 1; k <= 8; k++) {
-      const u = k / 8;
-      const m = 1 - u;
-      out.push(
-        m * m * x0 + 2 * m * u * s[0] + u * u * s[2],
-        m * m * y0 + 2 * m * u * s[1] + u * u * s[3],
-      );
-    }
-  }
-  return out;
-}
-
-function runLength(points: number[]) {
-  let length = 0;
-  for (let i = 2; i < points.length; i += 2)
-    length += Math.hypot(
-      points[i] - points[i - 2],
-      points[i + 1] - points[i - 1],
-    );
-  return length;
-}
-
-// LOGO_ROUTE as runs, and when the pulse covers each: the main line, then the branch down to the sub-node
-export const LOGO_RUNS = [
-  {
-    from: 0,
-    to: 1,
-    points: polyline(
-      [23, 48],
-      [28.5, 32],
-      [33, 17, 50, 17],
-      [113, 17],
-      [113, 48],
-      [107.5, 64],
-      [103, 79, 86, 79],
-      [23, 79],
-    ),
-  },
-  { from: 0.85, to: 0.92, points: [58, 79, 58, 90] },
-].map((run) => ({ ...run, length: runLength(run.points) }));
-
-// The point at distance d along a run and the unit normal there: x, y, nx, ny
-export function along(points: number[], d: number) {
-  let i = 2;
-  let len = Math.hypot(points[2] - points[0], points[3] - points[1]);
-  while (d > len && i < points.length - 2) {
-    d -= len;
-    i += 2;
-    len = Math.hypot(points[i] - points[i - 2], points[i + 1] - points[i - 1]);
-  }
-  const dx = (points[i] - points[i - 2]) / len;
-  const dy = (points[i + 1] - points[i - 1]) / len;
-  const u = Math.min(d, len);
-  return [points[i - 2] + dx * u, points[i - 1] + dy * u, -dy, dx];
-}
 
 function disc(c: CanvasRenderingContext2D, x: number, y: number, r: number) {
   c.beginPath();
@@ -244,15 +175,20 @@ const agents: Shape = {
   },
 };
 
-// One shape per chapter, in page order: start, play, code, ship, agents, handoff
-const SHAPES = [logo, gamepad, monitor, braces, agents, logo];
+const SHAPES: Record<ShapeName, Shape> = {
+  logo,
+  gamepad,
+  monitor,
+  braces,
+  agents,
+};
 
 type Box = { x: number; y: number; w: number; h: number };
 
 // Where a chapter's shape sits: the logo big and centred, the others beside the text, above it on phones.
-function boxFor(stage: number, w: number, h: number): Box {
+function boxFor(shape: ShapeName, w: number, h: number): Box {
   if (w < NARROW) return { x: 20, y: h * 0.05, w: w - 40, h: h * 0.38 };
-  if (stage === 0 || stage === SHAPES.length - 1)
+  if (shape === "logo")
     return { x: w * 0.04, y: h * 0.03, w: w * 0.92, h: h * 0.54 };
   // Right half, clear of the chapter rail
   return { x: w * 0.5, y: h * 0.16, w: w * 0.5 - 170, h: h * 0.68 };
@@ -299,7 +235,7 @@ function sample(shape: Shape, box: Box, n: number) {
 
 // The logo's dots: the hooks as sampled, then the nodes and the route drawn in the other hook's colour.
 // rest is where each dot sits, laid out like sample(); off is how the run moves it from there, per kind of dot.
-function logoDots(box: Box, n: number) {
+function logoDots(box: Box, n: number): LogoDots {
   const { scale, left, top } = fit(logo, box);
   const nodeStart = Math.round(n * 0.67);
   const routeStart = Math.round(n * 0.85);
@@ -364,35 +300,16 @@ function logoDots(box: Box, n: number) {
   return { rest, offX, offY, owner, at, nodeStart, routeStart };
 }
 
-// Scroll position to the chapter we are leaving and how far into the next one, holding still around each chapter's middle.
-export function chapter(centres: number[], viewportMiddle: number) {
-  const last = centres.length - 1;
-  if (viewportMiddle <= centres[0]) return { from: 0, t: 0 };
-  if (viewportMiddle >= centres[last]) return { from: last - 1, t: 1 };
-  let from = 0;
-  while (viewportMiddle > centres[from + 1]) from++;
-  const raw =
-    (viewportMiddle - centres[from]) / (centres[from + 1] - centres[from]);
-  return { from, t: Math.min(1, Math.max(0, (raw - 0.25) / 0.5)) };
-}
-
 const ease = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
 
-export function StoryParticles({
-  onChapter,
-}: {
-  onChapter: (i: number) => void;
-}) {
+export function StoryParticles() {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = ref.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
+    if (!canvas) return;
     const steps = [...document.querySelectorAll<HTMLElement>("[data-chapter]")];
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let still = motion.matches;
 
     let width = 0;
     let height = 0;
@@ -405,31 +322,18 @@ export function StoryParticles({
     let z = new Float32Array(0); // depth for mouse parallax, -1..1
     let delay = new Float32Array(0); // when a dot leaves its shape, 0..1
     let fly = new Float32Array(0); // burst direction and distance, x then y
-    let rig: ReturnType<typeof logoDots> | null = null;
-    let live = new Float32Array(0); // where the logo's dots head this frame, for both logo chapters
-    let glow = new Float32Array(0); // how much each logo dot lights up this frame, 0..1
-    const fire = new Float32Array(LOGO_NODES.length); // how swollen each node is, 0..1
-    const spinX = new Float32Array(LOGO_NODES.length); // each node's turn and swell, as cos and sin
-    const spinY = new Float32Array(LOGO_NODES.length);
-    let mouse: { x: number; y: number } | null = null;
+    let rig: ReturnType<typeof logoRig> | null = null;
     const tilt = { x: 0, y: 0 };
-    let frame = 0;
-    let onScreen = true;
-    let current = -1;
-    let colours = ["", ""]; // ink, accent; read again when the theme changes
-    function readColours() {
-      const style = getComputedStyle(canvas!);
-      colours = [style.borderTopColor, style.color];
+
+    // Resampling reshuffles the dots, so skip the small height changes of a phone's URL bar
+    function layout(w: number, h: number) {
+      if (n && w === width && Math.abs(h - height) < 120) return;
+      width = w;
+      height = h;
+      resample();
     }
 
-    function layout() {
-      width = canvas!.clientWidth;
-      height = canvas!.clientHeight;
-      if (!width) return;
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
-      canvas!.width = width * ratio;
-      canvas!.height = height * ratio;
-      ctx!.setTransform(ratio, 0, 0, ratio, 0, 0);
+    function resample() {
       const next = width < 700 ? 2600 : width < NARROW ? 4200 : 6400;
       if (next !== n) {
         // New cloud: every dot starts somewhere random and flies home, which is the intro
@@ -452,90 +356,39 @@ export function StoryParticles({
           fly[i * 2 + 1] = Math.sin(angle) * far;
         }
       }
-      rig = logoDots(boxFor(0, width, height), n);
-      live = rig.rest.slice();
-      glow = new Float32Array(n);
-      runLogo(LOGO_CYCLE - 1); // a quiet moment, the pulse gone and no node swelling: what still mode shows
-      targets = SHAPES.map((shape, i) =>
-        shape === logo ? live : sample(shape, boxFor(i, width, height), n),
+      rig = logoRig(logoDots(boxFor("logo", width, height), n));
+      const { live } = rig;
+      targets = CHAPTERS.map(({ shape }) =>
+        shape === "logo"
+          ? live
+          : sample(SHAPES[shape], boxFor(shape, width, height), n),
       );
-      if (still) {
-        const home = targets[0];
-        for (let i = 0; i < n; i++) {
-          x[i] = home[i * 3];
-          y[i] = home[i * 3 + 1];
-        }
-      }
     }
 
-    // Play the header logo's run on the logo's dots: move where they head and let the springs carry them there
-    function runLogo(now: number) {
+    let still = false; // the latest frame's reduced-motion state, for taps
+    function draw(ctx: CanvasRenderingContext2D, frame: Frame) {
       if (!rig) return;
-      const { rest, offX, offY, owner, at, nodeStart, routeStart } = rig;
-      const time = now % LOGO_CYCLE;
-      const pulse = time / LOGO_CROSS; // how far along the route the pulse is; past 1 it has gone
-      for (let k = 0; k < LOGO_NODES.length; k++) {
-        const since =
-          (time - LOGO_NODES[k][3] * LOGO_CROSS + LOGO_CYCLE) % LOGO_CYCLE;
-        fire[k] = Math.max(0, 1 - since / SWELL);
-        const turn = now * SPIN * (k % 2 ? 1 : -1);
-        spinX[k] = Math.cos(turn) * (1 + 0.5 * fire[k]);
-        spinY[k] = Math.sin(turn) * (1 + 0.5 * fire[k]);
-      }
-      for (let i = 0; i < n; i++) {
-        const k = owner[i];
-        let dx = offX[i];
-        let dy = offY[i];
-        if (i < nodeStart) {
-          dx *= fire[k];
-          dy *= fire[k];
-        } else if (i < routeStart) {
-          dx = offX[i] * spinX[k] - offY[i] * spinY[k];
-          dy = offX[i] * spinY[k] + offY[i] * spinX[k];
-          glow[i] = fire[k];
-        } else {
-          // The lanes spread as the pulse passes
-          glow[i] = Math.max(0, 1 - Math.abs(at[i] - pulse) / PULSE);
-          dx *= 1 + 3 * glow[i];
-          dy *= 1 + 3 * glow[i];
-        }
-        live[i * 3] = rest[i * 3] + dx;
-        live[i * 3 + 1] = rest[i * 3 + 1] + dy;
-      }
-    }
-
-    function progress() {
-      const centres = steps.map((el) => {
-        const r = el.getBoundingClientRect();
-        return r.top + r.height / 2;
-      });
-      return chapter(centres, window.innerHeight / 2);
-    }
-
-    function draw() {
-      if (!n || !targets.length) return;
-      let { from, t } = progress();
+      const { mouse } = frame;
+      const { glow } = rig;
+      still = frame.still;
+      let { from, t } = chapterOf(steps);
       if (still) {
         // No flight: show whichever chapter is nearer
         from = t < 0.5 ? from : from + 1;
         t = 0;
       }
-      const near = t < 0.5 ? from : from + 1;
-      if (near !== current) onChapter((current = near));
-      const last = SHAPES.length - 1;
-      const to = Math.min(from + 1, last);
-      if (!still && (from === 0 || to === last)) runLogo(performance.now());
-      const logoFrom = from === 0 ? 1 : 0;
-      const logoTo = to === last ? 1 : 0;
+      const to = Math.min(from + 1, CHAPTERS.length - 1);
+      const logoFrom = CHAPTERS[from].shape === "logo" ? 1 : 0;
+      const logoTo = CHAPTERS[to].shape === "logo" ? 1 : 0;
+      if (logoFrom || logoTo) rig.step(still ? LOGO_STILL : frame.now);
       const a = targets[from];
       const b = targets[to];
       const span = Math.min(width, height);
       tilt.x += ((mouse ? mouse.x / width - 0.5 : 0) - tilt.x) * 0.05;
       tilt.y += ((mouse ? mouse.y / height - 0.5 : 0) - tilt.y) * 0.05;
-      ctx!.clearRect(0, 0, width, height);
 
       for (let pass = 0; pass < 2; pass++) {
-        ctx!.fillStyle = colours[pass];
+        ctx.fillStyle = pass ? frame.accent : frame.ink;
         for (let i = 0; i < n; i++) {
           // Each dot leaves on its own beat, flies out, and lands in the next shape
           const own = Math.min(1, Math.max(0, (t - delay[i] * 0.4) / 0.6));
@@ -576,11 +429,11 @@ export function StoryParticles({
           const lift = Math.max(Math.sin(own * Math.PI), lit);
           const size = (1.4 + (z[i] + 1) * 0.45) * (1 + 1.8 * lift);
           const alpha = (pass ? 0.55 : 0.7) + (z[i] + 1) * 0.15;
-          ctx!.globalAlpha = alpha + (1 - alpha) * lift;
-          ctx!.fillRect(x[i] - size / 2, y[i] - size / 2, size, size);
+          ctx.globalAlpha = alpha + (1 - alpha) * lift;
+          ctx.fillRect(x[i] - size / 2, y[i] - size / 2, size, size);
           if (lift > 0.1 && !still) {
-            ctx!.globalAlpha *= 0.4;
-            ctx!.fillRect(
+            ctx.globalAlpha *= 0.4;
+            ctx.fillRect(
               x[i] - vx[i] * 2.5 - size / 4,
               y[i] - vy[i] * 2.5 - size / 4,
               size / 2,
@@ -589,39 +442,9 @@ export function StoryParticles({
           }
         }
       }
-      ctx!.globalAlpha = 1;
+      ctx.globalAlpha = 1;
     }
 
-    function loop() {
-      draw();
-      frame = requestAnimationFrame(loop);
-    }
-
-    function update() {
-      const run = !still && onScreen && !document.hidden && width > 0;
-      if (run && !frame) frame = requestAnimationFrame(loop);
-      if (!run && frame) {
-        cancelAnimationFrame(frame);
-        frame = 0;
-      }
-      if (still) draw();
-    }
-
-    // Reduced motion can change while the page is open: stop or start the loop, and rest the logo for still mode
-    function onMotion() {
-      still = motion.matches;
-      if (still) runLogo(LOGO_CYCLE - 1);
-      update();
-    }
-
-    function onMove(event: PointerEvent) {
-      if (event.pointerType !== "mouse") return;
-      const box = canvas!.getBoundingClientRect();
-      mouse = { x: event.clientX - box.left, y: event.clientY - box.top };
-    }
-    function onLeave() {
-      mouse = null;
-    }
     // Click or tap anywhere that is not a control: a shockwave throws nearby dots outwards
     let down: { x: number; y: number } | null = null;
     function onDown(event: PointerEvent) {
@@ -647,74 +470,28 @@ export function StoryParticles({
         }
       }
     }
-    // Still mode has no loop: repaint when scrolling picks another chapter
-    function onScroll() {
-      if (still) draw();
-    }
 
-    // Resampling reshuffles the dots, so skip the small height changes of a phone's URL bar and settle first
-    let resizing = 0;
+    const handle = runCanvas(canvas, { layout, draw });
+    if (!handle) return;
     let cancelled = false;
-    const resizer = new ResizeObserver(() => {
-      const sameWidth = canvas.clientWidth === width;
-      if (sameWidth && Math.abs(canvas.clientHeight - height) < 120) return;
-      clearTimeout(resizing);
-      resizing = window.setTimeout(
-        () => {
-          layout();
-          update();
-        },
-        width ? 150 : 0,
-      );
-    });
-    const watcher = new IntersectionObserver(([entry]) => {
-      onScreen = entry.isIntersecting;
-      update();
-    });
-    const recolour = () => {
-      readColours();
-      update();
-    };
-    const theme = new MutationObserver(recolour);
-    const scheme = window.matchMedia("(prefers-color-scheme: dark)");
-    resizer.observe(canvas);
-    watcher.observe(canvas);
-    theme.observe(document.documentElement, {
-      attributeFilter: ["data-theme"],
-    });
-    scheme.addEventListener("change", recolour);
-    motion.addEventListener("change", onMotion);
-    document.addEventListener("visibilitychange", update);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("pointermove", onMove);
+    // Still mode has no loop: repaint when scrolling picks another chapter
+    window.addEventListener("scroll", handle.paint, { passive: true });
     window.addEventListener("pointerdown", onDown);
     window.addEventListener("pointerup", onUp);
-    document.documentElement.addEventListener("pointerleave", onLeave);
     // The braces are type: sample again once the display face has loaded
-    readColours();
     document.fonts.ready.then(() => {
-      if (cancelled) return;
-      layout();
-      update();
+      if (cancelled || !width) return;
+      resample();
+      handle.paint();
     });
     return () => {
       cancelled = true;
-      clearTimeout(resizing);
-      resizer.disconnect();
-      watcher.disconnect();
-      theme.disconnect();
-      scheme.removeEventListener("change", recolour);
-      motion.removeEventListener("change", onMotion);
-      document.removeEventListener("visibilitychange", update);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("pointermove", onMove);
+      handle.stop();
+      window.removeEventListener("scroll", handle.paint);
       window.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointerup", onUp);
-      document.documentElement.removeEventListener("pointerleave", onLeave);
-      cancelAnimationFrame(frame);
-      frame = 0;
     };
-  }, [onChapter]);
+  }, []);
 
   return <canvas ref={ref} className="ab-canvas" aria-hidden="true" />;
 }

@@ -1,15 +1,29 @@
 "use client";
 
 // The chapter rail and the sticky particle stage; the chapters themselves scroll past in the page.
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
+import { CHAPTERS, chapterOf } from "./chapters";
 import { StoryParticles } from "./story-particles";
 import { smoothScrollClick } from "../smooth-scroll";
 
-// Section ids in page order, also the rail labels
-const chapters = ["start", "play", "code", "ship", "agents", "handoff"];
-
 export function Story() {
   const [active, setActive] = useState(0);
+
+  // Tracked here, not by the canvas, so the rail works before fonts load or without a canvas
+  useEffect(() => {
+    const steps = [...document.querySelectorAll<HTMLElement>("[data-chapter]")];
+    function track() {
+      const { from, t } = chapterOf(steps);
+      setActive(t < 0.5 ? from : from + 1);
+    }
+    track();
+    window.addEventListener("scroll", track, { passive: true });
+    window.addEventListener("resize", track);
+    return () => {
+      window.removeEventListener("scroll", track);
+      window.removeEventListener("resize", track);
+    };
+  }, []);
 
   return (
     <>
@@ -23,9 +37,9 @@ export function Story() {
         >
           <ol
             className="rail rail-end"
-            style={{ "--at": active / (chapters.length - 1) } as CSSProperties}
+            style={{ "--at": active / (CHAPTERS.length - 1) } as CSSProperties}
           >
-            {chapters.map((id, i) => (
+            {CHAPTERS.map(({ id }, i) => (
               <li key={id}>
                 <a
                   href={`#${id}`}
@@ -39,7 +53,7 @@ export function Story() {
         </nav>
       </div>
       <div className="ab-stage">
-        <StoryParticles onChapter={setActive} />
+        <StoryParticles />
       </div>
     </>
   );
