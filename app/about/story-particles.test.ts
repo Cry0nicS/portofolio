@@ -1,8 +1,14 @@
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { LOGO_CROSS, LOGO_CYCLE, LOGO_NODES } from "../logo";
-import { chapter } from "./chapters";
+import { CHAPTERS, chapter } from "./chapters";
 import { LOGO_RUNS, along } from "./logo-rig";
+
+// The story opens and closes on the big logo; types allow any shape, so this pins the bookends.
+test("the first and last Chapters are the logo", () => {
+  expect(CHAPTERS[0].shape).toBe("logo");
+  expect(CHAPTERS.at(-1)!.shape).toBe("logo");
+});
 
 // Scroll maps to a chapter pair and holds still around each chapter's centre.
 test("chapter progress", () => {

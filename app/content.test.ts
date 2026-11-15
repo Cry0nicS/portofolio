@@ -27,7 +27,14 @@ test("the homepage lists releases in the same order", () => {
 });
 
 test("side project hosts are derived from https links", () => {
-  for (const p of sideProjects) expect(p.href).toStartWith("https://");
+  for (const p of sideProjects) {
+    expect(p.href).toStartWith("https://");
+    // Every current project shows a bare host: its link's hostname minus a leading www.
+    const host = hostOf(p.href);
+    expect(host).not.toStartWith("www.");
+    expect(new URL(p.href).hostname.endsWith(host)).toBe(true);
+    expect(host.length).toBeGreaterThan(0);
+  }
   expect(hostOf("https://www.example.de/x")).toBe("example.de");
   expect(hostOf("https://github.com/a/b")).toBe("github.com");
 });
