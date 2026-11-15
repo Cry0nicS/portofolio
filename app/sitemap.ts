@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
+import { site } from "./site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    { url: "https://adrianpopescu.dev" },
-    { url: "https://adrianpopescu.dev/about" },
-  ];
+  return site.pages.map(([path]) => ({
+    url: site.origin + (path === "/" ? "" : path),
+  }));
 }

@@ -6,7 +6,7 @@ import { chapter, StoryParticles } from "./story-particles";
 import { smoothScrollClick } from "../smooth-scroll";
 
 // Section ids in page order, also the rail labels
-const chapters = ["start", "play", "code", "ship", "agents", "handoff"];
+export const chapters = ["start", "play", "code", "ship", "agents", "handoff"];
 
 export function Story() {
   const [active, setActive] = useState(0);

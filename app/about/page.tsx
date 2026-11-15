@@ -1,11 +1,14 @@
 // The about page: one cloud of dots turns into each chapter, from the first game to AI agents.
 import type { Metadata } from "next";
+import { og, site } from "../site";
 import Link from "next/link";
 import { Story } from "./story";
 import "./about.css";
 
 export const metadata: Metadata = {
   title: "About",
+  alternates: { canonical: "/about" },
+  openGraph: { ...og, url: "/about", title: "About" },
 };
 
 export default function About() {
@@ -114,7 +117,7 @@ export default function About() {
               See the work
             </Link>
             {/* The contact footer is already on screen under this button, so the button writes instead of jumping */}
-            <a className="ab-btn" href="mailto:contact@adrianpopescu.dev">
+            <a className="ab-btn" href={`mailto:${site.email}`}>
               Get in touch
             </a>
           </p>

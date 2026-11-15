@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, IBM_Plex_Mono } from "next/font/google";
 import Link from "next/link";
 import { Konami, ThemeToggle } from "./controls";
 import { PenTrail, PenTrailToggle } from "./pen-trail";
+import { site } from "./site";
 import { SiteNav } from "./site-nav";
 import {
   LOGO_ACCENT,
@@ -11,6 +12,7 @@ import {
   LOGO_ROUTE,
   LOGO_ROUTE_MAIN,
 } from "./logo";
+import { og } from "./site";
 import "./globals.css";
 
 // next/font downloads the fonts at build time and serves them from this domain: no Google requests at runtime.
@@ -29,24 +31,14 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-const description =
-  "Adrian Popescu: Technical Product Owner in Berlin. Ten years building esports platforms and running tournaments, now AI-first work that enables teams and improves products.";
-
 export const metadata: Metadata = {
-  metadataBase: new URL("https://adrianpopescu.dev"),
+  metadataBase: new URL(site.origin),
   title: {
     default: "Adrian Popescu · Builder first.",
     template: "%s · Adrian Popescu",
   },
-  description,
-  openGraph: {
-    type: "website",
-    url: "/",
-    siteName: "Adrian Popescu",
-    title: "Adrian Popescu · Builder first.",
-    description,
-    locale: "en_US",
-  },
+  description: og.description,
+  openGraph: { ...og, url: "/", title: "Adrian Popescu · Builder first." },
 };
 
 // Runs before first paint so a saved theme never flashes and the trail switch starts in its saved state.
@@ -59,7 +51,7 @@ const contact = [
     "in/adrian-popescu",
   ],
   ["GitHub", "https://github.com/Cry0nicS", "Cry0nicS"],
-  ["Email", "mailto:contact@adrianpopescu.dev", "contact@adrianpopescu.dev"],
+  ["Email", `mailto:${site.email}`, site.email],
 ];
 
 function Logo() {

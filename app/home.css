@@ -539,9 +539,3 @@
     border: 0;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .changelog * {
-    transition: none !important;
-  }
-}

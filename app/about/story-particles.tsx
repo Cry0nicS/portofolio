@@ -245,7 +245,7 @@ const agents: Shape = {
 };
 
 // One shape per chapter, in page order: start, play, code, ship, agents, handoff
-const SHAPES = [logo, gamepad, monitor, braces, agents, logo];
+export const SHAPES = [logo, gamepad, monitor, braces, agents, logo];
 
 type Box = { x: number; y: number; w: number; h: number };
 
