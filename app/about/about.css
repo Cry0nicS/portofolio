@@ -1,0 +1,208 @@
+/* About: a sticky particle stage with the chapters scrolling over it. */
+.about {
+  position: relative;
+}
+.ab-stage {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  height: 100dvh;
+  margin-bottom: -100dvh;
+  pointer-events: none;
+}
+/* The canvas reads its two dot colours from here: color is the accent, border-color the ink */
+.ab-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  color: var(--accent);
+  border-color: var(--text);
+}
+
+/* Chapter rail: a track that fills as the story advances */
+.ab-rail {
+  position: absolute;
+  right: clamp(1rem, 2.5vw, 2rem);
+  top: 50%;
+  translate: 0 -50%;
+  pointer-events: auto;
+}
+.ab-rail ol {
+  position: relative;
+  display: grid;
+}
+.ab-rail ol::before,
+.ab-rail ol::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  top: 1.35rem;
+  bottom: 1.35rem;
+  border-right: 1px solid var(--border);
+}
+.ab-rail ol::after {
+  border-color: var(--accent);
+  transform-origin: top;
+  scale: 1 var(--at);
+  transition: scale 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ab-rail a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 44px;
+  padding-right: 1.4rem;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.ab-rail a::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  width: 9px;
+  height: 9px;
+  z-index: 1;
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg);
+  transition:
+    border-color 0.2s,
+    background-color 0.2s,
+    scale 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ab-rail a:hover,
+.ab-rail a[aria-current] {
+  color: var(--accent);
+}
+.ab-rail a:hover::after {
+  border-color: var(--accent);
+}
+.ab-rail a[aria-current]::after {
+  border-color: var(--accent);
+  background: var(--accent);
+  scale: 1.35;
+}
+
+/* Chapters */
+.ab-step {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-items: center;
+  min-height: 110dvh;
+  /* Let pointer events through to the rail and the dots; the words themselves stay selectable */
+  pointer-events: none;
+}
+.ab-step .wrap > * {
+  pointer-events: auto;
+}
+.ab-step .wrap > * + * {
+  margin-top: 1.25rem;
+}
+/* Text keeps to the left half; the shape owns the right */
+.ab-step:not(.ab-step-wide) .wrap > * {
+  max-width: min(30rem, 40vw);
+}
+.ab-step h2 {
+  font-size: clamp(2.2rem, 4.4vw, 3.6rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+/* Opening and closing: the logo fills the top, the words sit under it */
+.ab-step-wide {
+  align-items: end;
+  min-height: 100dvh;
+  padding-bottom: clamp(1.5rem, 5dvh, 3rem);
+}
+#start {
+  min-height: calc(100dvh - 4.5rem);
+}
+.ab-step-wide .wrap > * {
+  max-width: 40rem;
+}
+.about h1 {
+  font-size: clamp(3rem, 8vw, 6rem);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  max-width: 12ch;
+}
+.ab-lead {
+  font-size: clamp(1.1rem, 1.8vw, 1.25rem);
+  line-height: 1.55;
+  color: var(--muted);
+}
+.ab-facts {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+.ab-facts span {
+  display: block;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+.ab-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+}
+.ab-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 0.5rem 1.15rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+}
+.ab-btn:hover {
+  border-color: var(--accent);
+  color: inherit;
+}
+.ab-btn-primary,
+.ab-btn-primary:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* Phones: the shape sits in the top of the screen, the words under it on a veil of paper */
+@media (max-width: 999px) {
+  .ab-rail {
+    display: none;
+  }
+  /* Words start under the shape, which fills the top 43% of the screen */
+  .ab-step {
+    align-items: start;
+    min-height: 100dvh;
+    padding-block: 44dvh 4dvh;
+  }
+  .ab-step-wide {
+    align-items: end;
+    padding-top: 44dvh;
+  }
+  .ab-step .wrap {
+    padding-block: 1.25rem;
+    background: color-mix(in oklab, var(--bg) 86%, transparent);
+    box-shadow: 0 0 1.5rem 1.5rem
+      color-mix(in oklab, var(--bg) 86%, transparent);
+  }
+  .ab-step:not(.ab-step-wide) .wrap > * {
+    max-width: 38rem;
+  }
+}
