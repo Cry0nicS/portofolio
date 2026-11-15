@@ -91,6 +91,10 @@ a:hover {
   outline-offset: 3px;
   border-radius: 4px;
 }
+/* Sections focused after an in-page jump (smooth-scroll.ts) take focus for screen readers, not a ring */
+[tabindex="-1"]:focus {
+  outline: none;
+}
 svg {
   display: block;
 }

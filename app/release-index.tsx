@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { smoothScrollClick } from "./smooth-scroll";
 
 // href, version tag, name, years, short name for the bottom bar on small screens
 const index = [
@@ -31,7 +32,7 @@ export function ReleaseIndex() {
   }, []);
 
   return (
-    <nav aria-label="Releases">
+    <nav aria-label="Releases" onClick={smoothScrollClick}>
       <ol className="cl-index rail">
         {index.map(([href, version, name, years, short]) => (
           <li key={href}>

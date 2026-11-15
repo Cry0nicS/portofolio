@@ -3,6 +3,7 @@
 // The chapter rail and the sticky particle stage; the chapters themselves scroll past in the page.
 import { useState, type CSSProperties } from "react";
 import { StoryParticles } from "./story-particles";
+import { smoothScrollClick } from "../smooth-scroll";
 
 // Section ids in page order, also the rail labels
 const chapters = ["start", "play", "code", "ship", "agents", "handoff"];
@@ -13,7 +14,12 @@ export function Story() {
   return (
     <>
       {/* Outside the stage so it can sit above the chapters' text veil on phones */}
-      <nav className="ab-rail mono" aria-label="Chapters">
+      <nav
+        className="ab-rail mono"
+        aria-label="Chapters"
+        // Settle on every chapter passed so each shape forms on the way
+        onClick={(event) => smoothScrollClick(event, "[data-chapter]")}
+      >
         <p className="ab-rail-now" aria-hidden="true">
           {chapters[active]}
         </p>
