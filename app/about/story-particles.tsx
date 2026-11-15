@@ -11,6 +11,7 @@ import {
   LOGO_ROUTE,
 } from "../logo";
 import { runCanvas, type Frame } from "../particles";
+import { CHAPTERS, chapterOf, type ShapeName } from "./chapters";
 
 const INK = "#f00"; // marker colours when sampling a shape; drawn as --text and --accent
 const ACCENT = "#0f0";
@@ -245,15 +246,20 @@ const agents: Shape = {
   },
 };
 
-// One shape per chapter, in page order: start, play, code, ship, agents, handoff
-export const SHAPES = [logo, gamepad, monitor, braces, agents, logo];
+const SHAPES: Record<ShapeName, Shape> = {
+  logo,
+  gamepad,
+  monitor,
+  braces,
+  agents,
+};
 
 type Box = { x: number; y: number; w: number; h: number };
 
 // Where a chapter's shape sits: the logo big and centred, the others beside the text, above it on phones.
-function boxFor(stage: number, w: number, h: number): Box {
+function boxFor(shape: ShapeName, w: number, h: number): Box {
   if (w < NARROW) return { x: 20, y: h * 0.05, w: w - 40, h: h * 0.38 };
-  if (stage === 0 || stage === SHAPES.length - 1)
+  if (shape === "logo")
     return { x: w * 0.04, y: h * 0.03, w: w * 0.92, h: h * 0.54 };
   // Right half, clear of the chapter rail
   return { x: w * 0.5, y: h * 0.16, w: w * 0.5 - 170, h: h * 0.68 };
@@ -365,27 +371,6 @@ function logoDots(box: Box, n: number) {
   return { rest, offX, offY, owner, at, nodeStart, routeStart };
 }
 
-// Scroll position to the chapter we are leaving and how far into the next one, holding still around each chapter's middle.
-export function chapter(centres: number[], viewportMiddle: number) {
-  const last = centres.length - 1;
-  if (viewportMiddle <= centres[0]) return { from: 0, t: 0 };
-  if (viewportMiddle >= centres[last]) return { from: last - 1, t: 1 };
-  let from = 0;
-  while (viewportMiddle > centres[from + 1]) from++;
-  const raw =
-    (viewportMiddle - centres[from]) / (centres[from + 1] - centres[from]);
-  return { from, t: Math.min(1, Math.max(0, (raw - 0.25) / 0.5)) };
-}
-
-// chapter() for the page's [data-chapter] elements at the middle of the viewport
-export function chapterOf(steps: HTMLElement[]) {
-  const centres = steps.map((el) => {
-    const r = el.getBoundingClientRect();
-    return r.top + r.height / 2;
-  });
-  return chapter(centres, window.innerHeight / 2);
-}
-
 const ease = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
 
@@ -447,11 +432,13 @@ export function StoryParticles() {
           fly[i * 2 + 1] = Math.sin(angle) * far;
         }
       }
-      rig = logoDots(boxFor(0, width, height), n);
+      rig = logoDots(boxFor("logo", width, height), n);
       live = rig.rest.slice();
       glow = new Float32Array(n);
-      targets = SHAPES.map((shape, i) =>
-        shape === logo ? live : sample(shape, boxFor(i, width, height), n),
+      targets = CHAPTERS.map(({ shape }) =>
+        shape === "logo"
+          ? live
+          : sample(SHAPES[shape], boxFor(shape, width, height), n),
       );
     }
 
@@ -502,13 +489,11 @@ export function StoryParticles() {
         from = t < 0.5 ? from : from + 1;
         t = 0;
       }
-      const last = SHAPES.length - 1;
-      const to = Math.min(from + 1, last);
+      const to = Math.min(from + 1, CHAPTERS.length - 1);
+      const logoFrom = CHAPTERS[from].shape === "logo" ? 1 : 0;
+      const logoTo = CHAPTERS[to].shape === "logo" ? 1 : 0;
       // Still mode shows a quiet moment of the run, the pulse gone and no node swelling
-      if (from === 0 || to === last)
-        runLogo(still ? LOGO_CYCLE - 1 : frame.now);
-      const logoFrom = from === 0 ? 1 : 0;
-      const logoTo = to === last ? 1 : 0;
+      if (logoFrom || logoTo) runLogo(still ? LOGO_CYCLE - 1 : frame.now);
       const a = targets[from];
       const b = targets[to];
       const span = Math.min(width, height);
