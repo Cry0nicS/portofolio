@@ -329,11 +329,6 @@ svg {
 .nav a:hover {
   color: var(--accent);
 }
-.nav a[aria-current="page"] {
-  color: var(--text);
-  text-decoration: underline 1px var(--accent);
-  text-underline-offset: 0.4em;
-}
 .icon-btn {
   display: grid;
   place-items: center;
@@ -465,11 +460,6 @@ svg {
 
 @media (max-width: 760px) {
   .brand span {
-    display: none;
-  }
-  /* On small screens the page docks and the footer do the section navigating; only the page links stay, minus the one for the current page */
-  .nav a:not([href="/"], [href="/about"]),
-  .nav a[aria-current="page"] {
     display: none;
   }
   .header {

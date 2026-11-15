@@ -3,14 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-// On phones the only links left are the page links (home, about), minus the one for the current page
+// Page links only, minus the current page; each page's rail or dock navigates its sections
 const links = [
   ["/", "home"],
   ["/about", "about"],
-  ["/#esports", "esports"],
-  ["/#work", "work"],
-  ["/#after-hours", "after hours"],
-  ["/#contact", "contact"],
 ];
 
 export function SiteNav() {
@@ -18,13 +14,9 @@ export function SiteNav() {
   return (
     <nav className="nav mono" aria-label="Site">
       {links
-        .filter(([href]) => href !== "/" || pathname !== "/")
+        .filter(([href]) => href !== pathname)
         .map(([href, label]) => (
-          <Link
-            key={href}
-            href={href}
-            aria-current={pathname === href ? "page" : undefined}
-          >
+          <Link key={href} href={href}>
             {label}
           </Link>
         ))}
