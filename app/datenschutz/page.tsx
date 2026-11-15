@@ -1,13 +1,7 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { og, site } from "../site";
+import { pageMetadata, site } from "../site";
 
-export const metadata: Metadata = {
-  title: "Datenschutz",
-  alternates: { canonical: "/datenschutz" },
-  openGraph: { ...og, url: "/datenschutz", title: "Datenschutz" },
-  robots: { index: false },
-};
+export const metadata = pageMetadata("/datenschutz");
 
 export default function Datenschutz() {
   return (
