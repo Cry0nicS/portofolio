@@ -36,7 +36,7 @@ export function SiteFooter() {
         <p>
           {legal.map(({ path, label }, i) => (
             <Fragment key={path}>
-              {i > 0 && [" ·", " "]}
+              {i > 0 && " · "}
               <Link href={path}>{label}</Link>
             </Fragment>
           ))}
