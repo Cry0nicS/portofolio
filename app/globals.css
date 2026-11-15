@@ -329,6 +329,11 @@ svg {
 .nav a:hover {
   color: var(--accent);
 }
+.nav a[aria-current="page"] {
+  color: var(--text);
+  text-decoration: underline 1px var(--accent);
+  text-underline-offset: 0.4em;
+}
 .icon-btn {
   display: grid;
   place-items: center;
@@ -462,8 +467,9 @@ svg {
   .brand span {
     display: none;
   }
-  /* On small screens the homepage release bar and the footer do the navigating */
-  .nav {
+  /* On small screens the page docks and the footer do the section navigating; only the page links stay, minus the one for the current page */
+  .nav a:not([href="/"], [href="/about"]),
+  .nav a[aria-current="page"] {
     display: none;
   }
   .header {
@@ -471,8 +477,54 @@ svg {
   }
 }
 
+/* Page dock: below 900px a page's rail (home releases, about chapters) floats at the bottom, in thumb reach.
+   One row of equal cells, the current one tinted; each page decides what a cell shows. */
 @media (max-width: 900px) {
-  /* Clear the homepage release dock */
+  .dock {
+    position: fixed;
+    inset: auto 0.75rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    z-index: 12;
+    padding: 0.25rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: color-mix(in oklab, var(--card) 92%, transparent);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+  }
+  .dock .rail {
+    position: static;
+    translate: none;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    margin: 0;
+  }
+  .dock .rail::before,
+  .dock .rail::after,
+  .dock .rail a::before {
+    display: none;
+  }
+  .dock .rail a {
+    display: grid;
+    justify-content: center; /* beats the desktop rails' flex-end, which would push the track in a grid */
+    justify-items: center;
+    align-content: center;
+    min-height: 50px;
+    padding: 0.25rem 0;
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: clamp(
+      0.6875rem,
+      3.2vw,
+      0.75rem
+    ); /* seven letters must fit a sixth of 320px */
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+  .dock .rail a[aria-current="step"] {
+    background: color-mix(in oklab, var(--accent) 14%, var(--card));
+    color: var(--text);
+  }
+  /* Clear the dock */
   .toast {
     bottom: 5.5rem;
   }

@@ -22,7 +22,7 @@ Ten years inside esports (engineer at GosuGamers, admin and referee at The Inter
 
 - Next.js on Bun, TypeScript strict, deployed on the Vercel Hobby tier: keep serverless and edge usage modest, no paid add-ons.
 - Homepage is written as release notes (v1.0 esports, v2.0 berlin, v3.0 ai-first).
-- The /about page is hidden for now: no nav link, no sitemap entry.
+- The /about page is public: linked in the header menu and listed in the sitemap.
 
 ## Brand Commitments
 

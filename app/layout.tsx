@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, IBM_Plex_Mono } from "next/font/google";
 import Link from "next/link";
 import { Konami, ThemeToggle } from "./controls";
 import { PenTrail, PenTrailToggle } from "./pen-trail";
+import { SiteNav } from "./site-nav";
 import {
   LOGO_ACCENT,
   LOGO_INK,
@@ -51,13 +52,6 @@ export const metadata: Metadata = {
 // Runs before first paint so a saved theme never flashes and the trail switch starts in its saved state.
 const restorePrefs = `try{var d=document.documentElement.dataset,t=localStorage.getItem("theme");if(t==="light"||t==="dark")d.theme=t;if(localStorage.getItem("trail")==="off")d.trail="off"}catch(e){}`;
 
-const links = [
-  ["/#esports", "esports"],
-  ["/#work", "work"],
-  ["/#after-hours", "after hours"],
-  ["/#contact", "contact"],
-];
-
 const contact = [
   [
     "LinkedIn",
@@ -103,13 +97,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Logo />
             <span>Adrian Popescu</span>
           </Link>
-          <nav className="nav mono" aria-label="Sections">
-            {links.map(([href, label]) => (
-              <Link key={href} href={href}>
-                {label}
-              </Link>
-            ))}
-          </nav>
+          <SiteNav />
           <div className="tools">
             <PenTrailToggle />
             <ThemeToggle />

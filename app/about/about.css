@@ -51,9 +51,6 @@
   padding-right: 1.4rem;
   color: var(--muted);
 }
-.ab-rail-now {
-  display: none;
-}
 
 /* Chapters */
 .ab-step {
@@ -155,63 +152,16 @@
 
 /* Phones: the shape sits in the top of the screen, the words under it on a veil of paper */
 @media (max-width: 999px) {
-  /* The rail turns into a dock across the top: the current word, then the six dots */
-  .ab-rail {
-    top: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    width: fit-content;
-    height: 46px;
-    margin: 0 auto -46px;
-    padding-inline: 0.85rem 0.25rem;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    background: color-mix(in oklab, var(--card) 92%, transparent);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
-  }
-  .ab-rail-now {
-    display: block;
-    min-width: 7ch;
-    color: var(--accent);
-  }
-  .ab-rail ol {
-    position: relative;
-    right: auto;
-    translate: none;
-    grid-auto-flow: column;
-    grid-auto-columns: 44px;
-  }
-  .ab-rail ol::before,
-  .ab-rail ol::after {
-    inset: 50% 22px auto;
-    border-inline: 0;
-    border-top: 1px solid var(--border);
-  }
-  .ab-rail ol::after {
-    border-color: var(--accent);
-    transform-origin: left;
-    scale: var(--at) 1;
-  }
-  /* Dots only: the word on the left names the current chapter, the label stays for screen readers */
-  .ab-rail a {
-    justify-content: center;
-    padding: 0;
-    font-size: 0;
-  }
-  .ab-rail .rail a::before {
-    inset-inline: auto calc(50% - 4.5px);
-  }
   /* Words start under the shape, which fills the top 43% of the screen */
   .ab-step {
     align-items: start;
     min-height: 100dvh;
     padding-block: 44dvh 4dvh;
   }
+  /* The opening line and the closing buttons clear the page dock */
   .ab-step-wide {
     align-items: end;
-    padding-top: 44dvh;
+    padding-block: 44dvh 6rem;
   }
   .ab-step .wrap {
     padding-block: 1.25rem;
@@ -221,12 +171,5 @@
   }
   .ab-step:not(.ab-step-wide) .wrap > * {
     max-width: 38rem;
-  }
-}
-
-/* Too narrow for the word beside six 44px dots */
-@media (max-width: 359px) {
-  .ab-rail .ab-rail-now {
-    display: none;
   }
 }

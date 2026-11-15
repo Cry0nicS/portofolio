@@ -13,32 +13,31 @@ export function Story() {
 
   return (
     <>
-      {/* Outside the stage so it can sit above the chapters' text veil on phones */}
-      <nav
-        className="ab-rail mono"
-        aria-label="Chapters"
-        // Slow through every chapter passed so each shape forms on the way
-        onClick={(event) => smoothScrollClick(event, "[data-chapter]")}
-      >
-        <p className="ab-rail-now" aria-hidden="true">
-          {chapters[active]}
-        </p>
-        <ol
-          className="rail rail-end"
-          style={{ "--at": active / (chapters.length - 1) } as CSSProperties}
+      {/* Outside the stage so it can sit above the chapters' text veil; below 900px the nav is the page dock */}
+      <div className="ab-rail">
+        <nav
+          className="dock mono"
+          aria-label="Chapters"
+          // Slow through every chapter passed so each shape forms on the way
+          onClick={(event) => smoothScrollClick(event, "[data-chapter]")}
         >
-          {chapters.map((id, i) => (
-            <li key={id}>
-              <a
-                href={`#${id}`}
-                aria-current={i === active ? "step" : undefined}
-              >
-                {id}
-              </a>
-            </li>
-          ))}
-        </ol>
-      </nav>
+          <ol
+            className="rail rail-end"
+            style={{ "--at": active / (chapters.length - 1) } as CSSProperties}
+          >
+            {chapters.map((id, i) => (
+              <li key={id}>
+                <a
+                  href={`#${id}`}
+                  aria-current={i === active ? "step" : undefined}
+                >
+                  {id}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </div>
       <div className="ab-stage">
         <StoryParticles onChapter={setActive} />
       </div>

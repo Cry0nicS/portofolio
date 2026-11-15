@@ -4,10 +4,8 @@ import Link from "next/link";
 import { Story } from "./story";
 import "./about.css";
 
-// Hidden for now: reachable by URL only, kept out of search and the sitemap.
 export const metadata: Metadata = {
   title: "About",
-  robots: { index: false },
 };
 
 export default function About() {

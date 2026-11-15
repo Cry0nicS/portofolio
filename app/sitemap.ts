@@ -1,5 +1,8 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [{ url: "https://adrianpopescu.dev" }];
+  return [
+    { url: "https://adrianpopescu.dev" },
+    { url: "https://adrianpopescu.dev/about" },
+  ];
 }
