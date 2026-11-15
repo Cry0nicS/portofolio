@@ -234,8 +234,7 @@ export default function Home() {
                   <span className="cl-log-years">{years ?? ""}</span>
                   <span>
                     <strong>{title}</strong>
-                    {/* "" keeps the flight payload as it was; undefined differs */}
-                    {detail ? <span className="muted"> · {detail}</span> : ""}
+                    {detail && <span className="muted"> · {detail}</span>}
                   </span>
                 </li>
               ))}
