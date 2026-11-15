@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { og } from "../site";
 
 export const metadata: Metadata = {
   title: "Impressum",
   alternates: { canonical: "/impressum" },
-  openGraph: { url: "/impressum", title: "Impressum" },
+  openGraph: { ...og, url: "/impressum", title: "Impressum" },
   robots: { index: false },
 };
 
