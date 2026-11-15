@@ -118,23 +118,23 @@ export const hostOf = (href: string) =>
 
 export const experience: Job[] = [
   {
-    years: "2024 — Now",
+    years: "2024 – now",
     company: "mkk meine-krankenkasse",
     role: "Technical Product Owner, Website, AI & Automation",
   },
   {
-    years: "2022 — 2024",
+    years: "2022 – 2024",
     company: "mkk meine-krankenkasse",
     role: "Senior Software Developer",
   },
-  { years: "2015 — 2022", company: "GosuGamers", role: "Software Engineer" },
+  { years: "2015 – 2022", company: "GosuGamers", role: "Software Engineer" },
   {
-    years: "2015 — 2018",
+    years: "2015 – 2018",
     company: "Esports Addicts",
     role: "Founder & Project Manager",
   },
   {
-    years: "2013 — 2015",
+    years: "2013 – 2015",
     company: "CGM Clinical Österreich",
     role: "Software Engineer",
   },
