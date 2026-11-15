@@ -379,11 +379,7 @@ export function chapter(centres: number[], viewportMiddle: number) {
 const ease = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
 
-export function StoryParticles({
-  onChapter,
-}: {
-  onChapter: (i: number) => void;
-}) {
+export function StoryParticles() {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -415,7 +411,6 @@ export function StoryParticles({
     const tilt = { x: 0, y: 0 };
     let frame = 0;
     let onScreen = true;
-    let current = -1;
     let colours = ["", ""]; // ink, accent; read again when the theme changes
     function readColours() {
       const style = getComputedStyle(canvas!);
@@ -520,8 +515,6 @@ export function StoryParticles({
         from = t < 0.5 ? from : from + 1;
         t = 0;
       }
-      const near = t < 0.5 ? from : from + 1;
-      if (near !== current) onChapter((current = near));
       const last = SHAPES.length - 1;
       const to = Math.min(from + 1, last);
       if (!still && (from === 0 || to === last)) runLogo(performance.now());
@@ -714,7 +707,7 @@ export function StoryParticles({
       cancelAnimationFrame(frame);
       frame = 0;
     };
-  }, [onChapter]);
+  }, []);
 
   return <canvas ref={ref} className="ab-canvas" aria-hidden="true" />;
 }
