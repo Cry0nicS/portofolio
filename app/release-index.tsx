@@ -32,10 +32,10 @@ export function ReleaseIndex() {
 
   return (
     <nav aria-label="Releases">
-      <ol className="cl-index">
+      <ol className="cl-index rail">
         {index.map(([href, version, name, years, short]) => (
           <li key={href}>
-            <a href={href} aria-current={current === href ? "true" : undefined}>
+            <a href={href} aria-current={current === href ? "step" : undefined}>
               <span className="cl-index-ver">{version}</span>
               <span className="cl-index-name">{name}</span>
               <span className="cl-index-short">{short}</span>

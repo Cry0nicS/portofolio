@@ -42,53 +42,20 @@
   white-space: nowrap;
 }
 .changelog .cl-index {
-  position: relative;
-  margin-top: 1.5rem;
-}
-.changelog .cl-index::before {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 1rem;
-  bottom: 1rem;
-  border-left: 1px solid var(--border);
+  --rail-inset: 1rem;
+  --rail-dot: 0.85rem;
+  /* Room for the focus ring (2px offset + 2px line) inside the scrolling sidebar */
+  margin: 1.5rem 4px 4px;
 }
 .changelog .cl-index a {
-  position: relative;
   display: grid;
   grid-template-columns: 2.75rem minmax(0, 1fr);
   column-gap: 0.5rem;
   padding: 0.5rem 0.5rem 0.5rem 1.5rem;
   border-radius: 6px;
-  text-decoration: none;
-  transition: background-color 0.2s;
-}
-.changelog .cl-index a::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.85rem;
-  width: 9px;
-  height: 9px;
-  border: 1.5px solid var(--border);
-  border-radius: 50%;
-  background: var(--bg);
-  transition: border-color 0.2s;
-}
-.changelog .cl-index a[aria-current]::before {
-  border-color: var(--accent);
-  background: var(--accent);
-}
-/* The scrolling sidebar would clip an outside ring */
-.changelog .cl-index a:focus-visible {
-  outline-offset: -2px;
 }
 .changelog .cl-index a:hover {
   background: var(--tint);
-  color: inherit;
-}
-.changelog .cl-index a:hover::before {
-  border-color: var(--accent);
 }
 /* TV tower under the index; shrinks with the viewport so the sticky sidebar still fits */
 .changelog .cl-tower {
@@ -519,7 +486,6 @@
     box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
   }
   .changelog .cl-index {
-    display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     margin: 0;
   }
@@ -554,10 +520,10 @@
     ); /* "ai-first" must fit a fifth of 320px */
     white-space: nowrap;
   }
-  .changelog .cl-index a[aria-current] {
+  .changelog .cl-index a[aria-current="step"] {
     background: color-mix(in oklab, var(--accent) 14%, var(--card));
   }
-  .changelog .cl-index a[aria-current] .cl-index-short {
+  .changelog .cl-index a[aria-current="step"] .cl-index-short {
     color: var(--text);
   }
   .changelog .cl-now.cl-now-inline {

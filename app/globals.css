@@ -102,6 +102,67 @@ svg {
 .muted {
   color: var(--muted);
 }
+
+/* Rail: ring dots on a thin line, the current one filled. Dots sit at the start; .rail-end moves them to the end.
+   --rail-inset trims the line to the first and last dot, --rail-dot places a dot in its row. */
+.rail {
+  position: relative;
+  display: grid;
+}
+.rail::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 4px;
+  top: var(--rail-inset, 1.35rem);
+  bottom: var(--rail-inset, 1.35rem);
+  border-inline-start: 1px solid var(--border);
+}
+.rail a {
+  position: relative;
+  text-decoration: none;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
+}
+.rail a::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: var(--rail-dot, calc(50% - 4.5px));
+  z-index: 1;
+  width: 9px;
+  height: 9px;
+  /* 60% muted keeps the ring above 3:1 on --bg in both themes */
+  border: 1.5px solid color-mix(in oklab, var(--muted) 60%, var(--border));
+  border-radius: 50%;
+  background: var(--bg);
+  transition:
+    border-color 0.2s,
+    background-color 0.2s,
+    scale 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.rail-end::before {
+  inset-inline: auto 4px;
+}
+.rail-end a::before {
+  inset-inline: auto 0;
+}
+.rail a:hover,
+.rail a[aria-current="step"] {
+  color: var(--accent);
+}
+.rail a:hover::before {
+  border-color: var(--accent);
+}
+.rail a[aria-current="step"]::before {
+  border-color: var(--accent);
+  background: var(--accent);
+  scale: 1.35;
+}
+/* The ring clears the dot, which sits on the link's edge; a scrolling box around a rail needs 4px of margin for it */
+.rail a:focus-visible {
+  outline-offset: 2px;
+}
 .wrap {
   width: min(100% - 2.5rem, 68rem);
   margin-inline: auto;
