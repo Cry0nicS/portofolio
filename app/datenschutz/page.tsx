@@ -1,12 +1,7 @@
-import type { Metadata } from "next";
 import Link from "next/link";
+import { pageMetadata, site } from "../site";
 
-export const metadata: Metadata = {
-  title: "Datenschutz",
-  alternates: { canonical: "/datenschutz" },
-  openGraph: { url: "/datenschutz", title: "Datenschutz" },
-  robots: { index: false },
-};
+export const metadata = pageMetadata("/datenschutz");
 
 export default function Datenschutz() {
   return (
@@ -20,8 +15,7 @@ export default function Datenschutz() {
       <h2>Verantwortlicher</h2>
       <p>
         Adrian Popescu, Anschrift siehe <Link href="/impressum">Impressum</Link>
-        . E-Mail:{" "}
-        <a href="mailto:contact@adrianpopescu.dev">contact@adrianpopescu.dev</a>
+        . E-Mail: <a href={`mailto:${site.email}`}>{site.email}</a>
       </p>
 
       <h2>Hosting und Server-Logs</h2>
