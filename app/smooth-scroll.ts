@@ -88,9 +88,11 @@ export function smoothScrollClick(event: MouseEvent, stops?: string) {
     target.focus({ preventScroll: true });
   };
 
+  const path = location.pathname;
   const from = window.scrollY;
   const to = landing(target);
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+  if (reduced.matches) {
     window.scrollTo({ top: to, behavior: "instant" });
     return arrive();
   }
@@ -114,11 +116,27 @@ export function smoothScrollClick(event: MouseEvent, stops?: string) {
       passive: true,
       signal: abort.signal,
     });
+  // History moved under the animation (Back): leave the URL and focus alone
+  for (const type of ["popstate", "hashchange"])
+    window.addEventListener(type, cancel, { signal: abort.signal });
+  // Reduce switched on mid-scroll: jump to the target instead of animating on
+  reduced.addEventListener(
+    "change",
+    () => {
+      if (!reduced.matches) return;
+      cancel();
+      window.scrollTo({ top: to, behavior: "instant" });
+      arrive();
+    },
+    { signal: abort.signal },
+  );
 
   const duration = scrollDuration(to - from, window.innerHeight, passed.length);
   // Count from a frame before the click so the very first frame already moves
   const start = performance.now() - 16;
   let frame = requestAnimationFrame(function step(now) {
+    // The route changed (client navigation) and took the target with it
+    if (!target.isConnected || location.pathname !== path) return cancel();
     const { top, done } = scrollAt(points, now - start, duration);
     window.scrollTo({ top, behavior: "instant" });
     if (!done) frame = requestAnimationFrame(step);
