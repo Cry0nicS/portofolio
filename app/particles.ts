@@ -26,7 +26,8 @@ export function runParticles(
 ) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
-  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let still = motion.matches;
   let dots: Dot[] = [];
   let width = 0;
   let height = 0;
@@ -108,6 +109,17 @@ export function runParticles(
     if (still && width > 0) draw(0);
   }
 
+  // Reduced motion can flip while open; settle dots back home so the still shape is the drawn one
+  function onMotion() {
+    still = motion.matches;
+    for (const d of dots) {
+      d.x = d.hx;
+      d.y = d.hy;
+      d.vx = d.vy = 0;
+    }
+    update();
+  }
+
   function onMove(event: PointerEvent) {
     if (event.pointerType !== "mouse") return;
     const box = canvas.getBoundingClientRect();
@@ -133,15 +145,15 @@ export function runParticles(
   theme.observe(document.documentElement, { attributeFilter: ["data-theme"] });
   scheme.addEventListener("change", update);
   document.addEventListener("visibilitychange", update);
-  if (!still) {
-    window.addEventListener("pointermove", onMove);
-    document.documentElement.addEventListener("pointerleave", onLeave);
-  }
+  motion.addEventListener("change", onMotion);
+  window.addEventListener("pointermove", onMove);
+  document.documentElement.addEventListener("pointerleave", onLeave);
   return () => {
     resizer.disconnect();
     watcher.disconnect();
     theme.disconnect();
     scheme.removeEventListener("change", update);
+    motion.removeEventListener("change", onMotion);
     document.removeEventListener("visibilitychange", update);
     window.removeEventListener("pointermove", onMove);
     document.documentElement.removeEventListener("pointerleave", onLeave);
