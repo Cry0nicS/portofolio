@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, IBM_Plex_Mono } from "next/font/google";
 import { Konami } from "./controls";
 import { PenTrail } from "./pen-trail";
-import { og, site } from "./site";
+import { og, site, tagline, titleTemplate } from "./site";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 import "./globals.css";
@@ -26,11 +26,15 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(site.origin),
   title: {
-    default: "Adrian Popescu · Builder first.",
-    template: "%s · Adrian Popescu",
+    default: tagline,
+    template: titleTemplate,
   },
   description: og.description,
-  openGraph: { ...og, url: "/", title: "Adrian Popescu · Builder first." },
+  openGraph: {
+    ...og,
+    url: "/",
+    title: { default: tagline, template: titleTemplate },
+  },
 };
 
 // Runs before first paint so a saved theme never flashes and the trail switch starts in its saved state.

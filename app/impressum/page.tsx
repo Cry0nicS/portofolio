@@ -1,12 +1,6 @@
-import type { Metadata } from "next";
-import { og, site } from "../site";
+import { pageMetadata, site } from "../site";
 
-export const metadata: Metadata = {
-  title: "Impressum",
-  alternates: { canonical: "/impressum" },
-  openGraph: { ...og, url: "/impressum", title: "Impressum" },
-  robots: { index: false },
-};
+export const metadata = pageMetadata("/impressum");
 
 export default function Impressum() {
   return (
