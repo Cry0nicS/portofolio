@@ -2,6 +2,14 @@
 
 // One cloud of dots that becomes each chapter of the story as the page scrolls, bursting apart between shapes.
 import { useEffect, useRef } from "react";
+import {
+  LOGO_ACCENT,
+  LOGO_CROSS,
+  LOGO_CYCLE,
+  LOGO_INK,
+  LOGO_NODES,
+  LOGO_ROUTE,
+} from "../logo";
 
 const INK = "#f00"; // marker colours when sampling a shape; drawn as --text and --accent
 const ACCENT = "#0f0";
@@ -18,32 +26,12 @@ type Shape = {
   draw: (c: CanvasRenderingContext2D) => void;
 };
 
-// Workflow Handoff mark, same paths as the header logo (app/layout.tsx); strings, as Path2D does not exist on the server
-const LOGO_INK =
-  "M0 62L17 14C21 5 28 0 40 0H117Q121 0 121 4V25Q121 29 117 29H60C54 29 51 31 48 37L37 62Z";
-const LOGO_ACCENT =
-  "M88 59L97 38Q99 34 103 34H120L129 19Q131 16 134.5 16Q138 16 137 20L122 74C117 89 106 96 90 96H22Q14 96 14 88V75Q14 67 22 67H76C82 67 85 65 88 59Z";
-const LOGO_ROUTE =
-  "M23 48L28.5 32Q33 17 50 17H113V48L107.5 64Q103 79 86 79H23M58 79V90";
-// Each node: x, y, radius, and when the header pulse reaches it (--at in globals.css)
-export const LOGO_NODES = [
-  [23, 48, 5.5, 0],
-  [50, 17, 5.5, 0.17],
-  [113, 17, 5.5, 0.43],
-  [113, 48, 5.5, 0.57],
-  [86, 79, 5.5, 0.74],
-  [58, 79, 5.5, 0.85],
-  [58, 90, 3.5, 0.92],
-  [23, 79, 5.5, 1],
-];
 const PAD = 3; // the logo is drawn this far in from the shape's edge
 
 // The header logo's run (globals.css): the pulse crosses the route in 1.9s of every 2.4s, and each node swells 1.5x as it passes
-const CYCLE = 2400;
-const CROSS = 1900;
-const SWELL = 0.14 * CYCLE; // how long a node takes to shrink back
+const SWELL = 0.14 * LOGO_CYCLE; // how long a node takes to shrink back
 const PULSE = 0.03; // half the pulse's length, a dash of 6 on a route of pathLength 100
-const SPIN = (Math.PI * 2) / (CYCLE * 4); // node dots turn once every four runs
+const SPIN = (Math.PI * 2) / (LOGO_CYCLE * 4); // node dots turn once every four runs
 
 // Points along a run, x then y; a 4-number segment is a quadratic curve (control point, end), flattened into short lines
 function polyline(...segments: number[][]) {
@@ -403,7 +391,8 @@ export function StoryParticles({
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
     const steps = [...document.querySelectorAll<HTMLElement>("[data-chapter]")];
-    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let still = motion.matches;
 
     let width = 0;
     let height = 0;
@@ -466,7 +455,7 @@ export function StoryParticles({
       rig = logoDots(boxFor(0, width, height), n);
       live = rig.rest.slice();
       glow = new Float32Array(n);
-      runLogo(CYCLE - 1); // a quiet moment, the pulse gone and no node swelling: what still mode shows
+      runLogo(LOGO_CYCLE - 1); // a quiet moment, the pulse gone and no node swelling: what still mode shows
       targets = SHAPES.map((shape, i) =>
         shape === logo ? live : sample(shape, boxFor(i, width, height), n),
       );
@@ -483,10 +472,11 @@ export function StoryParticles({
     function runLogo(now: number) {
       if (!rig) return;
       const { rest, offX, offY, owner, at, nodeStart, routeStart } = rig;
-      const time = now % CYCLE;
-      const pulse = time / CROSS; // how far along the route the pulse is; past 1 it has gone
+      const time = now % LOGO_CYCLE;
+      const pulse = time / LOGO_CROSS; // how far along the route the pulse is; past 1 it has gone
       for (let k = 0; k < LOGO_NODES.length; k++) {
-        const since = (time - LOGO_NODES[k][3] * CROSS + CYCLE) % CYCLE;
+        const since =
+          (time - LOGO_NODES[k][3] * LOGO_CROSS + LOGO_CYCLE) % LOGO_CYCLE;
         fire[k] = Math.max(0, 1 - since / SWELL);
         const turn = now * SPIN * (k % 2 ? 1 : -1);
         spinX[k] = Math.cos(turn) * (1 + 0.5 * fire[k]);
@@ -617,6 +607,13 @@ export function StoryParticles({
       if (still) draw();
     }
 
+    // Reduced motion can change while the page is open: stop or start the loop, and rest the logo for still mode
+    function onMotion() {
+      still = motion.matches;
+      if (still) runLogo(LOGO_CYCLE - 1);
+      update();
+    }
+
     function onMove(event: PointerEvent) {
       if (event.pointerType !== "mouse") return;
       const box = canvas!.getBoundingClientRect();
@@ -686,6 +683,7 @@ export function StoryParticles({
       attributeFilter: ["data-theme"],
     });
     scheme.addEventListener("change", recolour);
+    motion.addEventListener("change", onMotion);
     document.addEventListener("visibilitychange", update);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("pointermove", onMove);
@@ -706,6 +704,7 @@ export function StoryParticles({
       watcher.disconnect();
       theme.disconnect();
       scheme.removeEventListener("change", recolour);
+      motion.removeEventListener("change", onMotion);
       document.removeEventListener("visibilitychange", update);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onMove);
